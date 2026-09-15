@@ -13,6 +13,17 @@ on-chain → verify → attest → dispute. The data sold (a skill credential,
 not a wallet risk-score) and the attestation engine (Solana/Anchor, not
 EAS) are new for this product.
 
+**Attesto is not a rename of Prova — they're two separate products by the
+same team.** Prova (`theprova.xyz`, separate repo, separate deployed
+program) is a general-purpose AI-agent behavior attestation service.
+Attesto is a new, distinct product that *reads* Prova's real on-chain
+attestation data as one input to its own paid skill-check score, and
+writes its own attestations to its own program (`attesto_program`,
+separate Program ID — see "What's deployed right now" below). See
+`DECISIONS.md` ("attesto_program is a separate program from
+prova_program") for why that separation was kept even though the two are
+related.
+
 Built for Crypto World's Fair (Colosseum), Solana track.
 
 ## Status
