@@ -9,6 +9,12 @@ import bs58 from "bs58";
 import idl from "./idl/attesto_program.json";
 import type { AttestoProgram } from "./idl/attesto_program";
 import { ATTESTO_PROGRAM_ID, RPC_URL, getIssuerKeypair } from "./config";
+import {
+  decodeDispute,
+  decodeFulfillmentReceipt,
+  type DecodedDispute,
+  type DecodedFulfillmentReceipt,
+} from "./decode-accounts";
 
 const RECEIPT_SEED = Buffer.from("attesto_receipt");
 const DISPUTE_SEED = Buffer.from("attesto_dispute");
@@ -70,6 +76,24 @@ export async function findReceiptByPaymentSignature(
     ],
   });
   return accounts.length > 0 ? accounts[0].pubkey : null;
+}
+
+export async function getReceiptAccount(
+  resourceId: Buffer,
+): Promise<{ address: PublicKey; data: DecodedFulfillmentReceipt } | null> {
+  const address = deriveReceiptPda(resourceId);
+  const info = await getConnection().getAccountInfo(address);
+  if (!info) return null;
+  return { address, data: decodeFulfillmentReceipt(info.data) };
+}
+
+export async function getDisputeAccount(
+  resourceId: Buffer,
+): Promise<{ address: PublicKey; data: DecodedDispute } | null> {
+  const address = deriveDisputePda(resourceId);
+  const info = await getConnection().getAccountInfo(address);
+  if (!info) return null;
+  return { address, data: decodeDispute(info.data) };
 }
 
 export interface RecordFulfillmentArgs {

@@ -5,6 +5,26 @@ reasoning behind them — so anyone reading this later (a judge, an
 investor, a future contributor) can see there was real judgment behind the
 code, not just code. Newest first.
 
+## 2026-09-15 — Disputes and metrics stay fully non-custodial and DB-free too
+
+`POST /v1/disputes` doesn't file a dispute on the caller's behalf — it
+can't, `file_dispute` requires `disputer.key() == receipt.payer`, so only
+the original payer's own wallet can sign it. The endpoint's actual job is
+narrower and honest about it: the disputer signs and submits
+`file_dispute` themselves, directly on devnet, then POSTs the resulting
+`{resourceId, signature}` here. The route verifies the transaction
+succeeded and actually touched this resourceId's dispute PDA, then reads
+back and returns the resulting on-chain record. Same trust shape as the
+payment flow (client acts on-chain first, server verifies after) —
+consistent on purpose, not two different mental models in the same repo.
+
+`GET /v1/metrics` is computed live from `getProgramAccounts` on every
+request (discriminator-filtered for `FulfillmentReceipt` and `Dispute`,
+counts and unique payers derived from what's actually returned) — no
+counters cached in a database that could drift from on-chain reality.
+Cheap enough at hackathon scale; revisit if/when receipt count grows
+large enough that a full scan on every metrics request stops being free.
+
 ## 2026-09-15 — Two-layer replay protection, both on-chain, no side database
 
 `record_fulfillment_attestation` and `file_dispute` both need to reject
