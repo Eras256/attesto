@@ -1,10 +1,6 @@
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
-import {
-  Connection,
-  PublicKey,
-  SystemProgram,
-} from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import bs58 from "bs58";
 import idl from "./idl/attesto_program.json";
 import type { AttestoProgram } from "./idl/attesto_program";
@@ -120,10 +116,13 @@ export async function recordFulfillmentAttestation(
       args.score,
       paymentSigBytes,
     )
+    // `receipt` and `systemProgram` are omitted on purpose, not missing:
+    // the IDL declares `receipt`'s PDA seeds and `systemProgram`'s fixed
+    // address, so Anchor's client resolves both on its own from the
+    // `resourceId` arg above. Passing them explicitly is a type error
+    // against the generated ResolvedAccounts<> type, not just redundant.
     .accounts({
-      receipt,
       issuer: issuer.publicKey,
-      systemProgram: SystemProgram.programId,
     })
     .rpc();
 
