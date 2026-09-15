@@ -31,7 +31,8 @@ Built for Crypto World's Fair (Colosseum), Solana track.
 - **Fase 0** (bootstrap) — done.
 - **Fase 1** (pay → verify → attest loop) — done. `GET /v1/skill-check/:address`
   is live against real devnet, x402 flow included.
-- **Fase 2** (disputes + metrics) — in progress.
+- **Fase 2** (disputes + metrics) — done. `POST /v1/disputes` and
+  `GET /v1/metrics` are live against real devnet.
 - **Fase 3** (attesto.xyz frontend) — not started.
 
 See `DECISIONS.md` for the architecture calls behind this and why.
@@ -46,6 +47,13 @@ See `DECISIONS.md` for the architecture calls behind this and why.
 - `GET /v1/skill-check/:address` (Next.js route handler, `app/v1/skill-check/[address]/route.ts`):
   full x402 402-then-retry flow, payment verified directly against RPC (no
   facilitator), score derived from Prova's real on-chain attestation data.
+- `POST /v1/disputes` (`app/v1/disputes/route.ts`): verifies an
+  already-submitted, payer-signed `file_dispute` transaction and returns
+  the resulting on-chain record. Body: `{ resourceId: <64-char hex>, signature: <base58 tx signature> }`.
+- `GET /v1/metrics` (`app/v1/metrics/route.ts`): public, unpaid, computed
+  live from devnet on every request — unique payers, requests served,
+  volume, attestations, disputes. Never hardcoded, never cached in a
+  database.
 
 ## Running locally
 
