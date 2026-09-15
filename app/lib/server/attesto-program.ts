@@ -1,10 +1,6 @@
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
-import {
-  Connection,
-  PublicKey,
-  SystemProgram,
-} from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import bs58 from "bs58";
 import idl from "./idl/attesto_program.json";
 import type { AttestoProgram } from "./idl/attesto_program";
@@ -40,14 +36,14 @@ export function getAttestoProgram(): Program<AttestoProgram> {
 export function deriveReceiptPda(resourceId: Buffer): PublicKey {
   return PublicKey.findProgramAddressSync(
     [RECEIPT_SEED, resourceId],
-    ATTESTO_PROGRAM_ID,
+    ATTESTO_PROGRAM_ID
   )[0];
 }
 
 export function deriveDisputePda(resourceId: Buffer): PublicKey {
   return PublicKey.findProgramAddressSync(
     [DISPUTE_SEED, resourceId],
-    ATTESTO_PROGRAM_ID,
+    ATTESTO_PROGRAM_ID
   )[0];
 }
 
@@ -61,7 +57,7 @@ export function deriveDisputePda(resourceId: Buffer): PublicKey {
  * database, so it stays independently auditable.
  */
 export async function findReceiptByPaymentSignature(
-  paymentSignature: string,
+  paymentSignature: string
 ): Promise<PublicKey | null> {
   const connection = getConnection();
   const accounts = await connection.getProgramAccounts(ATTESTO_PROGRAM_ID, {
@@ -79,7 +75,7 @@ export async function findReceiptByPaymentSignature(
 }
 
 export async function getReceiptAccount(
-  resourceId: Buffer,
+  resourceId: Buffer
 ): Promise<{ address: PublicKey; data: DecodedFulfillmentReceipt } | null> {
   const address = deriveReceiptPda(resourceId);
   const info = await getConnection().getAccountInfo(address);
@@ -88,7 +84,7 @@ export async function getReceiptAccount(
 }
 
 export async function getDisputeAccount(
-  resourceId: Buffer,
+  resourceId: Buffer
 ): Promise<{ address: PublicKey; data: DecodedDispute } | null> {
   const address = deriveDisputePda(resourceId);
   const info = await getConnection().getAccountInfo(address);
@@ -105,7 +101,7 @@ export interface RecordFulfillmentArgs {
 }
 
 export async function recordFulfillmentAttestation(
-  args: RecordFulfillmentArgs,
+  args: RecordFulfillmentArgs
 ): Promise<{ signature: string; receipt: PublicKey }> {
   const program = getAttestoProgram();
   const issuer = getIssuerKeypair();
@@ -118,12 +114,10 @@ export async function recordFulfillmentAttestation(
       args.payer,
       args.checkedAddress,
       args.score,
-      paymentSigBytes,
+      paymentSigBytes
     )
     .accounts({
-      receipt,
       issuer: issuer.publicKey,
-      systemProgram: SystemProgram.programId,
     })
     .rpc();
 

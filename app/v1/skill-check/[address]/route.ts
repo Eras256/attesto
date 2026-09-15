@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PublicKey } from "@solana/web3.js";
+import bs58 from "bs58";
 import {
   CHALLENGE_TTL_SECONDS,
   PRICE_ATOMIC,
@@ -140,6 +141,22 @@ export async function GET(
   }
 
   const paymentSignature = xPayment.payload.signature;
+
+  let decodedSignature: Uint8Array;
+  try {
+    decodedSignature = bs58.decode(paymentSignature);
+  } catch {
+    return NextResponse.json(
+      { error: "malformed payment signature — expected base58" },
+      { status: 400, headers: corsHeaders() },
+    );
+  }
+  if (decodedSignature.length !== 64) {
+    return NextResponse.json(
+      { error: "malformed payment signature — expected a 64-byte ed25519 signature" },
+      { status: 400, headers: corsHeaders() },
+    );
+  }
 
   const alreadyUsed = await findReceiptByPaymentSignature(paymentSignature);
   if (alreadyUsed) {
