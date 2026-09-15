@@ -1,0 +1,11 @@
+{
+  "idl": "./anchor/target/idl/attesto_program.json",
+  "scripts": {
+    "js": [
+      {
+        "from": "@codama/renderers-js",
+        "args": ["./app/generated/attesto_program"]
+      }
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "helius": {
+      "source": "sendaifun/skills",
+      "sourceType": "github",
+      "skillPath": "skills/helius/SKILL.md",
+      "computedHash": "434d7cc2307933a733fa52305cf4fe51ac4fe9f025c7099759d340567d77f811"
+    },
+    "metengine-data-agent": {
+      "source": "sendaifun/skills",
+      "sourceType": "github",
+      "skillPath": "skills/metengine/SKILL.md",
+      "computedHash": "5b5171c4b11070612895a4d78d912a14fcb15e0c1a10f0980a3fe6aed541d657"
+    },
+    "solana-agent-kit": {
+      "source": "sendaifun/skills",
+      "sourceType": "github",
+      "skillPath": "skills/solana-agent-kit/SKILL.md",
+      "computedHash": "2d7d29bae78b6d259303164df0fa1378de74852b39affccfddcee89e32b20007"
+    },
+    "solana-dev": {
+      "source": "solana-foundation/solana-dev-skill",
+      "sourceType": "github",
+      "skillPath": "skills/solana-dev/SKILL.md",
+      "computedHash": "0eb862cba9fd87a4e51d2837b4d436055e20459ee0f27b05c33e059a3de3ad27"
+    },
+    "surfpool": {
+      "source": "sendaifun/skills",
+      "sourceType": "github",
+      "skillPath": "skills/surfpool/SKILL.md",
+      "computedHash": "8f916d8d46f64380ba016685bd9286824e6c2f067ae5deb54b362820f30b2b55"
+    },
+    "vulnhunter": {
+      "source": "sendaifun/skills",
+      "sourceType": "github",
+      "skillPath": "skills/vulnhunter/SKILL.md",
+      "computedHash": "6ce3cd084ba02bdf2338850651c52bf7ec16667461e47156e2c1a049d2fdb3ad"
+    },
+    "zz-code-recon": {
+      "source": "sendaifun/skills",
+      "sourceType": "github",
+      "skillPath": "skills/zz-code-recon/SKILL.md",
+      "computedHash": "21205f2c5c55d531da07ffd125f1515a42ce4294dcc1d925b2e20dfa78c23e9d"
+    }
+  }
+}
