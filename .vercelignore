@@ -1,0 +1,13 @@
+# Vercel's CLI upload does NOT automatically honor .gitignore -- without
+# this file, it tried to upload the full local directory, anchor/target/
+# (2.1GB of Rust/Solana build output, irrelevant to the Next.js app)
+# included, which is what saturated the connection on the first attempt.
+# None of this is needed server-side: Vercel reinstalls node_modules
+# itself, and the Anchor program isn't part of the Next.js build.
+
+anchor/target/
+anchor/.anchor/
+node_modules/
+.next/
+.git/
+test-ledger/
