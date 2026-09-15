@@ -1,167 +1,83 @@
-# attesto-scaffold
+# Attesto
 
-Next.js starter with Tailwind CSS, `@solana/kit`, and an Anchor vault program example.
+An x402-metered oracle on Solana: an AI agent pays cents in USDC to verify
+whether an address has a real, on-chain skill credential behind it —
+sourced from [Prova](https://theprova.xyz)'s attestation registry — before
+hiring or transacting with it. Every paid check mints its own
+proof-of-fulfillment attestation on-chain, independently resolvable
+without trusting this server.
 
-## Getting Started
+Reuses the pipeline shape already validated in production by
+[Vouch402](https://vouch402.xyz) (Base/EVM, live): quote → pay directly
+on-chain → verify → attest → dispute. The data sold (a skill credential,
+not a wallet risk-score) and the attestation engine (Solana/Anchor, not
+EAS) are new for this product.
 
-```shell
-npx -y create-solana-dapp@latest -t solana-foundation/templates/kit/attesto-scaffold
-```
+Built for Crypto World's Fair (Colosseum), Solana track.
 
-```shell
+## Status
+
+- **Fase 0** (bootstrap) — done.
+- **Fase 1** (pay → verify → attest loop) — done. `GET /v1/skill-check/:address`
+  is live against real devnet, x402 flow included.
+- **Fase 2** (disputes + metrics) — in progress.
+- **Fase 3** (attesto.xyz frontend) — not started.
+
+See `DECISIONS.md` for the architecture calls behind this and why.
+
+## What's deployed right now
+
+- `attesto_program` (Anchor, Solana devnet): `EgLkDDxhS1Cd61VjJzMSURC1zko3xtbcAexQqyGBqvdk`
+  — a program of its own, separate from Prova's live `prova_program`
+  (`G11dBAzLQaADtHHM2AZNz3ThCDnkY5nhX3Ujddu1CMM1`), which Attesto only
+  *reads* from for scoring. Two instructions: `record_fulfillment_attestation`
+  and `file_dispute`. See `anchor/programs/attesto_program/src`.
+- `GET /v1/skill-check/:address` (Next.js route handler, `app/v1/skill-check/[address]/route.ts`):
+  full x402 402-then-retry flow, payment verified directly against RPC (no
+  facilitator), score derived from Prova's real on-chain attestation data.
+
+## Running locally
+
+```bash
 npm install
-npm run setup   # Builds the Anchor program and generates the TypeScript client
+cp .env.example .env.local   # fill in ATTESTO_ISSUER_KEYPAIR_PATH and ATTESTO_HMAC_SECRET
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000), connect your wallet, and interact with the vault.
+`GET http://localhost:3000/v1/skill-check/<any base58 pubkey>` with no
+payment header returns a 402 with a `resourceId` and payment instructions.
+Pay the quoted amount of devnet USDC to the `payTo` address with a
+`transferChecked` instruction, then retry the same request with header
+`X-PAYMENT: base64({x402Version,scheme,network,payload:{resourceId,signature}})`.
 
-## What's Included
-
-- **Wallet connection** via wallet-standard with auto-discovery and dropdown UI
-- **Cluster switching** — devnet, testnet, mainnet, and localnet from the header
-- **Wallet balance** display with airdrop button (devnet/testnet/localnet)
-- **SOL Vault program** — deposit and withdraw SOL from a personal PDA vault
-- **Toast notifications** with explorer links for every transaction
-- **Error handling** — human-readable messages for common Solana and program errors
-- **Codama-generated client** — type-safe program interactions using `@solana/kit`
-- **Tailwind CSS v4** with light/dark mode toggle
-
-## Stack
-
-| Layer          | Technology                       |
-| -------------- | -------------------------------- |
-| Frontend       | Next.js 16, React 19, TypeScript |
-| Styling        | Tailwind CSS v4                  |
-| Solana Client  | `@solana/kit`, wallet-standard   |
-| Program Client | Codama-generated, `@solana/kit`  |
-| Program        | Anchor (Rust)                    |
-
-## Project Structure
-
-```
-├── app/
-│   ├── components/
-│   │   ├── cluster-context.tsx  # Cluster state (React context + localStorage)
-│   │   ├── cluster-select.tsx   # Cluster switcher dropdown
-│   │   ├── grid-background.tsx  # Solana-branded decorative grid
-│   │   ├── providers.tsx        # Wallet + theme providers
-│   │   ├── theme-toggle.tsx     # Light/dark mode toggle
-│   │   ├── vault-card.tsx       # Vault deposit/withdraw UI
-│   │   └── wallet-button.tsx    # Wallet connect/disconnect dropdown
-│   ├── generated/vault/        # Codama-generated program client
-│   ├── lib/
-│   │   ├── wallet/             # Wallet-standard connection layer
-│   │   │   ├── types.ts        # Wallet types
-│   │   │   ├── standard.ts     # Wallet discovery + session creation
-│   │   │   ├── signer.ts       # WalletSession → TransactionSigner
-│   │   │   └── context.tsx     # WalletProvider + useWallet() hook
-│   │   ├── hooks/
-│   │   │   ├── use-balance.ts  # SWR-based balance fetching
-│   │   │   └── use-send-transaction.ts  # Transaction send with loading state
-│   │   ├── cluster.ts          # Cluster endpoints + RPC factory
-│   │   ├── lamports.ts         # SOL/lamports conversion
-│   │   ├── send-transaction.ts # Transaction build + sign + send pipeline
-│   │   ├── errors.ts           # Transaction error parsing
-│   │   └── explorer.ts         # Explorer URL builder + address helpers
-│   └── page.tsx                # Main page
-├── anchor/                     # Anchor workspace
-│   └── programs/vault/         # Vault program (Rust)
-└── codama.json                 # Codama client generation config
-```
-
-## Local Development
-
-To test against a local validator instead of devnet:
-
-1. **Start a local validator**
-
-   ```bash
-   solana-test-validator
-   ```
-
-2. **Deploy the program locally**
-
-   ```bash
-   solana config set --url localhost
-   cd anchor
-   anchor build
-   anchor deploy
-   cd ..
-   npm run codama:js   # Regenerate client with local program ID
-   ```
-
-3. **Switch to localnet** in the app using the cluster selector in the header.
-
-## Deploy Your Own Vault
-
-The included vault program is already deployed to devnet. To deploy your own:
-
-> **Note:** `npm run setup` and `npm run anchor-build` pass `--ignore-keys` to `anchor build` so the program keeps the devnet program ID shipped with this template (`F4jZpgbtTb6RWNWq6v35fUeiAsRJMrDczVPv9U23yXjB`). Anchor 1.x otherwise generates a fresh program keypair on build and rewrites `declare_id!`. The steps below build without that flag on purpose, so Anchor syncs your own program ID before deploying.
-
-### Prerequisites
-
-- [Rust](https://rustup.rs/)
-- [Solana CLI](https://solana.com/docs/intro/installation)
-- [Anchor](https://www.anchor-lang.com/docs/installation)
-
-### Steps
-
-1. **Configure Solana CLI for devnet**
-
-   ```bash
-   solana config set --url devnet
-   ```
-
-2. **Create a wallet (if needed) and fund it**
-
-   ```bash
-   solana-keygen new
-   solana airdrop 2
-   ```
-
-3. **Build and deploy the program**
-
-   ```bash
-   cd anchor
-   anchor build
-   anchor keys sync    # Updates program ID in source
-   anchor build        # Rebuild with new ID
-   anchor deploy
-   cd ..
-   ```
-
-4. **Regenerate the client and restart**
-   ```bash
-   npm run setup   # Rebuilds program and regenerates client
-   npm run dev
-   ```
-
-## Testing
-
-Tests use [LiteSVM](https://github.com/LiteSVM/litesvm), a fast lightweight Solana VM for testing.
+## Anchor program
 
 ```bash
-npm run anchor-build   # Build the program first
-npm run anchor-test    # Run tests
+cd anchor
+anchor build
+anchor deploy --provider.cluster devnet --provider.wallet <path-to-upgrade-authority>
 ```
 
-The tests are in `anchor/programs/vault/src/tests.rs` and automatically use the program ID from `declare_id!`.
+Toolchain is pinned to `anchor-lang`/`solana_version` 0.31.0 to match
+`prova_program` and the installed `anchor-cli`. See the comments in
+`anchor/programs/attesto_program/Cargo.toml` for the transitive-dependency
+pins this requires (several crates ship editions the SBF toolchain's
+bundled rustc can't build).
 
-## Regenerating the Client
-
-If you modify the program, regenerate the TypeScript client:
+If you touch the program, regenerate the copy of the IDL the backend reads
+from (`anchor/target/` is gitignored, so this copy is what actually ships):
 
 ```bash
-npm run setup   # Or: npm run anchor-build && npm run codama:js
+cp anchor/target/idl/attesto_program.json app/lib/server/idl/attesto_program.json
+cp anchor/target/types/attesto_program.ts app/lib/server/idl/attesto_program.ts
 ```
 
-This uses [Codama](https://github.com/codama-idl/codama) to generate a type-safe client from the Anchor IDL.
+## Legal posture
 
-## Learn More
-
-- [Solana Docs](https://solana.com/docs) — core concepts and guides
-- [Anchor Docs](https://www.anchor-lang.com/docs/introduction) — program development framework
-- [Deploying Programs](https://solana.com/docs/programs/deploying) — deployment guide
-- [@solana/kit](https://github.com/anza-xyz/kit) — Solana JavaScript SDK
-- [Codama](https://github.com/codama-idl/codama) — client generation from IDL
+Attesto never accumulates a per-client balance and never intermediates an
+exchange of assets — every request settles atomically and Attesto is paid
+only for its own computation (the score). Keep it that way; see
+`.claude/skills/mexico-legal-check/SKILL.md` before changing anything about
+how payment or settlement works, and avoid "wallet/exchange/custody/broker/
+intermediary/matching engine/deposit/balance" in product copy per that
+skill's guidance.
