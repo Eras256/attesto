@@ -47,3 +47,10 @@ next-env.d.ts
 # solana local validator
 test-ledger/
 .claude/skills/teammate-commit-identity/
+
+# skill-installer artifacts for other tools (mirrors of .claude/skills/,
+# not content of this project) -- keeps the public repo to what's actually
+# used here
+.agents/
+.aider-desk/
+skills-lock.json
