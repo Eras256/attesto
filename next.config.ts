@@ -1,7 +1,33 @@
 import type { NextConfig } from "next";
 
+const ATTESTO_BACKEND_URL = "https://attesto-api.fly.dev";
+
 const nextConfig: NextConfig = {
+  // "standalone" is for the Fly/Docker build only — it skips the trace
+  // files Vercel's own build pipeline expects to post-process itself
+  // (build fails on Vercel with output:"standalone" set unconditionally).
+  // Vercel sets VERCEL=1 in its build environment automatically.
+  output: process.env.VERCEL ? undefined : "standalone",
   serverExternalPackages: ["ws"],
+  // attesto.xyz (this Vercel deployment) serves the frontend only. The real
+  // backend — payment verification, the issuer key, the HMAC secret — runs
+  // on Fly (attesto-api.fly.dev), same as Vouch402's split. `beforeFiles` is
+  // required: without it, Next.js resolves the local /v1/* route files
+  // first (they still exist in this codebase) and the rewrite never fires.
+  // Keeps a single public domain matching the API reference docs, without
+  // duplicating ATTESTO_HMAC_SECRET/ATTESTO_ISSUER_SECRET_KEY on Vercel.
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: "/v1/:path*",
+          destination: `${ATTESTO_BACKEND_URL}/v1/:path*`,
+        },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
   // @solana/kit-plugin-payer's browser bundle has a spurious `import 'fs'`
   // from the payerFromFile export. Stub it out for the client bundle.
   turbopack: {

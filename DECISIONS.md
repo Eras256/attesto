@@ -5,6 +5,155 @@ reasoning behind them — so anyone reading this later (a judge, an
 investor, a future contributor) can see there was real judgment behind the
 code, not just code. Newest first.
 
+## 2026-09-17 — attesto.xyz (Vercel) proxies /v1/* to attesto-api.fly.dev; verified the memo/payment-marker fix against real production traffic
+
+Deploying the payment-binding fix (see entry below) needed a backend that
+can read `ATTESTO_ISSUER_SECRET_KEY`/`ATTESTO_HMAC_SECRET` from the
+environment — Vercel's project for attesto.xyz never had either configured
+(confirmed: `vercel env ls production` listed only 6 of the 8 required
+vars), which is the actual reason "Try it" was broken in production before
+today, not a filesystem-persistence issue as first assumed.
+
+Rather than add the missing secrets to Vercel or migrate the domain's DNS
+to Fly, kept a single public domain (attesto.xyz, matching every example
+in the API reference docs) with the real backend logic living on Fly
+(`attesto-api.fly.dev`) — same split Vouch402 already runs in production.
+`next.config.ts`'s `rewrites()` forwards `/v1/:path*` to Fly using
+`beforeFiles` (required: without it, Next.js resolves this same repo's
+local `/v1/*` route files first and the rewrite never fires, since they
+still exist in the codebase Vercel builds — they're just never reached
+once the rewrite is in place). No secret exists on Vercel; the frontend
+build there doesn't need any of the six either since values only matter at
+request time.
+
+Hit one build break doing this: `output: "standalone"` (added for the Fly
+Docker image) makes Vercel's own build fail — it skips the trace files
+Vercel's pipeline expects to post-process itself
+(`ENOENT: .next/next-server.js.nft.json`). Made it conditional on
+`process.env.VERCEL` (set automatically in Vercel's build environment),
+so Fly still gets the standalone output it needs and Vercel gets its
+normal build.
+
+**Verified against real production traffic, not just locally**, a real
+funded devnet wallet (funded from the project's own treasury/deployer
+keys — the treasury ATA holds real USDC.deposit accumulated from earlier
+real testing) ran the actual x402 flow against both `attesto-api.fly.dev`
+directly and through `attesto.xyz`, four scenarios each, all as expected:
+
+1. Real `transferChecked` + memo → `200`, a real fulfillment receipt and
+   attestation transaction, both independently resolvable on an explorer.
+2. Reusing that same payment signature against a *different* resourceId →
+   `409`, rejected by the new on-chain `PaymentMarker` PDA.
+3. Paying for one resourceId's memo, then trying to redeem a *different*
+   resourceId with that same payment → `402`, rejected because the memo
+   doesn't match — front-running closed.
+4. A second, distinct, correctly-memo'd payment on the same address still
+   → `200` normally, confirming the fix doesn't break legitimate repeated
+   use.
+
+## 2026-09-17 — First security review found the payment wasn't bound to a specific request; fixed with a Memo + an on-chain payment marker
+
+Ran a real security pass (no prior audit had ever been done on this
+codebase) before deploying a second production target. Two related
+findings, both confirmed by reading the code directly, not just trusting
+the review's output:
+
+**The core problem:** `verifyPaymentTransaction` (`app/lib/server/verify-payment.ts`)
+only checked that a confirmed `transferChecked` matched the right
+destination, mint, decimals, and amount — nothing tied the payment
+transaction to the specific `resourceId` being redeemed. `TREASURY_ATA` is
+one shared address for every request, and confirmed transactions are
+public on-chain data.
+
+- **Front-running:** anyone watching devnet for a confirmed
+  `transferChecked` of the exact quoted amount to the treasury ATA could
+  grab that signature and redeem it against their own `resourceId` before
+  the legitimate payer's own retry — a stranger's real payment, stolen.
+- **One payment, many mints:** the only reuse guard was an off-chain
+  `getProgramAccounts` memcmp scan (`findReceiptByPaymentSignature`), run
+  *before* payment verification and the on-chain mint — a real TOCTOU
+  window. Two concurrent requests with the same payment signature but
+  different `resourceId`s both passed the scan (neither receipt existed
+  yet) and both minted, because the receipt PDA is seeded only on
+  `resource_id`, not on the payment signature. One real payment could fund
+  unlimited attestations. This is exactly the "crédito prepagado" failure
+  mode the project's own hard rule (AGENTS.md, atomic settlement) warns
+  about — reached via a race instead of an explicit balance field.
+
+**Fix, two parts:**
+
+1. **Payment binds to a specific resourceId via SPL Memo.** The client now
+   builds `[create-ATA-if-needed, transferChecked, memo]` in one
+   transaction — the memo (program `MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr`)
+   carries the exact `resourceId` token string being redeemed.
+   `verify-payment.ts` now requires that memo to be present and to match
+   before accepting the payment; a transfer of the right amount with no
+   memo (or the wrong one) is rejected outright. This closes the
+   front-running path: a stolen signature carries someone else's
+   `resourceId` in its memo, not the attacker's.
+2. **One payment, one mint, enforced on-chain.** Added `PaymentMarker`
+   (`anchor/programs/attesto_program/src/state/payment_marker.rs`), a PDA
+   seeded on `payment_signature_hash` and `init`'d in the *same*
+   `record_fulfillment_attestation` instruction as the `FulfillmentReceipt`
+   — Solana's `init` constraint is atomic per-PDA, so a second concurrent
+   request reusing the same signature fails outright, same guarantee that
+   already protected against `resourceId` reuse. This is the real fix for
+   the TOCTOU race; the off-chain scan is kept only as a fast, friendly
+   pre-check, not the actual defense anymore.
+   (`payment_signature_hash` is caller-supplied and independently
+   re-verified on-chain against `hash(payment_signature)` — a 64-byte
+   signature exceeds Solana's 32-byte seed limit, and Anchor's IDL-build
+   macro can't evaluate a `hash()` call inline inside `seeds`, so the hash
+   is computed in TS and checked in the handler instead of the accounts
+   macro.)
+
+Replacing the "pay externally, paste the signature back" flow with an
+in-browser wallet-signed transaction (`@solana/kit` + the wallet-standard
+plumbing already used by the vault demo, not `@solana/wallet-adapter-react`
+— that library isn't in this codebase at all) was a deliberate reversal of
+the Fase 3 decision to skip wallet integration; keeping the old paste-in
+flow as a fallback for advanced/CLI users would have left the memo
+requirement effectively unenforceable for them (nothing stops them typing
+in a real signature that has no memo), so a "manual entry" mode is kept
+only as a visibly separate, clearly optional path, not the default.
+
+## 2026-09-15 — Fase 3 frontend: no wallet-adapter, paste-signature flow (later reversed — see 2026-09-17 above)
+
+Built attesto.xyz's real product page (hero → how it works → live activity
+→ Try it → API reference → legal) on the same structure Vouch402 already
+proves in production. For "Try it," chose not to add wallet-adapter
+integration: the flow asked the user to pay the quoted amount from any
+wallet or CLI they already controlled, then paste the confirmed
+transaction signature back into the page. Simpler to ship for a hackathon
+deadline, and Vouch402's own production pattern doesn't require an
+in-page wallet connection either.
+
+Two real bugs found and fixed while building and testing this, not just
+typechecked:
+
+- `next build`'s real TypeScript check (never run before — `next dev`
+  transpiles without it) was failing on a pre-existing type error in
+  `attesto-program.ts`: passing `receipt` and `systemProgram` into
+  `.accounts()` when Anchor's typed client already auto-resolves both from
+  the IDL. Removed both, kept only `issuer` (the one actual signer).
+  Confirmed against the IDL before changing it, re-verified against real
+  devnet after.
+- Driving the Try It flow end-to-end with a garbled payment signature
+  surfaced an unhandled exception in the skill-check route: a malformed
+  signature reached `getProgramAccounts`' memcmp filter and threw,
+  producing a raw 500 instead of a usable error. Added base58 + 64-byte
+  validation up front, returns a clean 400.
+
+Verified in a real headless browser (Playwright): desktop and mobile
+layouts, live metrics loading real numbers, and the full
+quote → checkbox → paste-signature → error-recovery path clicked through
+end to end.
+
+**This decision (no wallet-adapter) was reversed two days later** once a
+security review found that the paste-signature flow had no way to bind a
+payment to the specific request it was meant to pay for — see the
+2026-09-17 entry above for why, and what replaced it.
+
 ## 2026-09-15 — Disputes and metrics stay fully non-custodial and DB-free too
 
 `POST /v1/disputes` doesn't file a dispute on the caller's behalf — it

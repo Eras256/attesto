@@ -24,6 +24,7 @@ pub mod attesto_program {
         checked_address: Pubkey,
         score: u8,
         payment_signature: [u8; 64],
+        payment_signature_hash: [u8; 32],
     ) -> Result<()> {
         instructions::record_fulfillment_attestation::handler(
             ctx,
@@ -32,6 +33,7 @@ pub mod attesto_program {
             checked_address,
             score,
             payment_signature,
+            payment_signature_hash,
         )
     }
 

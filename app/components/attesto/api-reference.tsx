@@ -24,9 +24,16 @@ const ENDPOINTS = [
     example: `# 1. Request without paying — get the price
 curl ${SITE_URL}/v1/skill-check/9jFjRSwN7zchM83LDLHugcDmGKe3fJ7MKaZPZVb8VYvh
 
-# 2. Pay the quoted USDC on-chain yourself, then retry with proof
+# 2. Pay the quoted USDC yourself: a transferChecked of maxAmountRequired
+#    to payTo, PLUS an SPL Memo instruction (program
+#    MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr) in the SAME transaction
+#    whose data is the resourceId string from step 1, verbatim. Required —
+#    it's what binds this payment to this specific request; a transfer of
+#    the right amount with no memo (or the wrong one) is rejected.
+
+# 3. Retry with proof
 curl ${SITE_URL}/v1/skill-check/9jFjRSwN7zchM83LDLHugcDmGKe3fJ7MKaZPZVb8VYvh \\
-  -H "X-PAYMENT: $(printf '%s' '{"x402Version":1,"scheme":"exact","network":"solana-devnet","payload":{"resourceId":"<resourceId from step 1>","signature":"<your confirmed transferChecked signature>"}}' | base64)"`,
+  -H "X-PAYMENT: $(printf '%s' '{"x402Version":1,"scheme":"exact","network":"solana-devnet","payload":{"resourceId":"<resourceId from step 1>","signature":"<your confirmed transaction signature>"}}' | base64)"`,
   },
   {
     method: "GET",

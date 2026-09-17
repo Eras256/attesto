@@ -5,7 +5,7 @@ const STEPS = [
   },
   {
     title: "Pay directly on-chain",
-    body: "Send the quoted USDC straight to the given address with a standard transferChecked instruction — no facilitator sits in between.",
+    body: "Send the quoted USDC straight to the given address with a transferChecked instruction, plus a memo binding the payment to this exact request — no facilitator sits in between.",
   },
   {
     title: "Retry with your proof",

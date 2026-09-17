@@ -33,7 +33,11 @@ Built for Crypto World's Fair (Colosseum), Solana track.
   is live against real devnet, x402 flow included.
 - **Fase 2** (disputes + metrics) — done. `POST /v1/disputes` and
   `GET /v1/metrics` are live against real devnet.
-- **Fase 3** (attesto.xyz frontend) — not started.
+- **Fase 3** (attesto.xyz frontend) — done. Hero, live activity, Try it,
+  API reference, and legal page are live at attesto.xyz. Full paid
+  quote → pay → mint flow verified against real production traffic
+  (attesto.xyz → attesto-api.fly.dev) with a funded devnet wallet — see
+  `DECISIONS.md`.
 
 See `DECISIONS.md` for the architecture calls behind this and why.
 
@@ -66,7 +70,11 @@ npm run dev
 `GET http://localhost:3000/v1/skill-check/<any base58 pubkey>` with no
 payment header returns a 402 with a `resourceId` and payment instructions.
 Pay the quoted amount of devnet USDC to the `payTo` address with a
-`transferChecked` instruction, then retry the same request with header
+`transferChecked` instruction, **plus an SPL Memo instruction in the same
+transaction whose data is the `resourceId` string verbatim** — required,
+it's what binds the payment to this specific request (see DECISIONS.md,
+"Payment binds to a specific resourceId via SPL Memo"). Then retry the
+same request with header
 `X-PAYMENT: base64({x402Version,scheme,network,payload:{resourceId,signature}})`.
 
 ## Anchor program
