@@ -1,6 +1,7 @@
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::hash::hash;
 use crate::errors::AttestoError;
-use crate::state::FulfillmentReceipt;
+use crate::state::{FulfillmentReceipt, PaymentMarker};
 
 /// Pubkey of Attesto's dedicated issuer keypair — the only signer allowed to
 /// mint a fulfillment receipt. Deliberately separate from the program's
@@ -17,7 +18,7 @@ pub const ISSUER_PUBKEY: Pubkey = anchor_lang::solana_program::pubkey!(
 );
 
 #[derive(Accounts)]
-#[instruction(resource_id: [u8; 32])]
+#[instruction(resource_id: [u8; 32], payer: Pubkey, checked_address: Pubkey, score: u8, payment_signature: [u8; 64], payment_signature_hash: [u8; 32])]
 pub struct RecordFulfillmentAttestation<'info> {
     #[account(
         init,
@@ -27,6 +28,25 @@ pub struct RecordFulfillmentAttestation<'info> {
         bump
     )]
     pub receipt: Account<'info, FulfillmentReceipt>,
+
+    /// Guards against one payment_signature backing more than one receipt.
+    /// Seeded on payment_signature_hash (the caller-supplied SHA-256 of
+    /// payment_signature — 64 bytes exceeds the 32-byte seed limit, and
+    /// Anchor's IDL-build macro can't evaluate a hash() call inline in
+    /// `seeds`, hence precomputing it) and `init`'d in this same instruction,
+    /// so a second concurrent request reusing the same signature fails
+    /// atomically here — see PaymentMarker's doc comment for why this
+    /// replaces the old off-chain getProgramAccounts scan. The handler
+    /// re-derives the hash itself and rejects a mismatch, so a caller can't
+    /// desync the seed from the actual signature being recorded.
+    #[account(
+        init,
+        payer = issuer,
+        space = PaymentMarker::LEN,
+        seeds = [PaymentMarker::SEED, payment_signature_hash.as_ref()],
+        bump
+    )]
+    pub payment_marker: Account<'info, PaymentMarker>,
 
     #[account(mut, constraint = issuer.key() == ISSUER_PUBKEY @ AttestoError::UnauthorizedIssuer)]
     pub issuer: Signer<'info>,
@@ -41,8 +61,13 @@ pub fn handler(
     checked_address: Pubkey,
     score: u8,
     payment_signature: [u8; 64],
+    payment_signature_hash: [u8; 32],
 ) -> Result<()> {
     require!(score <= 100, AttestoError::InvalidScore);
+    require!(
+        hash(&payment_signature).to_bytes() == payment_signature_hash,
+        AttestoError::PaymentHashMismatch
+    );
 
     let receipt = &mut ctx.accounts.receipt;
     let clock = Clock::get()?;
@@ -55,6 +80,8 @@ pub fn handler(
     receipt.created_at = clock.unix_timestamp;
     receipt.disputed = false;
     receipt.bump = ctx.bumps.receipt;
+
+    ctx.accounts.payment_marker.bump = ctx.bumps.payment_marker;
 
     emit!(FulfillmentAttested {
         receipt: receipt.key(),

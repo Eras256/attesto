@@ -1,4 +1,5 @@
 import { PublicKey, ParsedInstruction, PartiallyDecodedInstruction } from "@solana/web3.js";
+import bs58 from "bs58";
 import { getConnection } from "./attesto-program";
 import { PRICE_ATOMIC, TREASURY_ATA, USDC_DECIMALS, USDC_MINT } from "./config";
 
@@ -24,9 +25,40 @@ function isParsed(
  * payer already broadcast and confirmed this on-chain before ever showing
  * up here.
  */
+const MEMO_PROGRAM_ID = "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr";
+
+function extractMemo(
+  instructions: (ParsedInstruction | PartiallyDecodedInstruction)[],
+): string | null {
+  for (const ix of instructions) {
+    if (isParsed(ix) && ix.program === "spl-memo" && typeof ix.parsed === "string") {
+      return ix.parsed;
+    }
+    if (!isParsed(ix) && ix.programId.toBase58() === MEMO_PROGRAM_ID) {
+      try {
+        return Buffer.from(bs58.decode(ix.data)).toString("utf-8");
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * `expectedResourceId` is the full HMAC token the payer is redeeming (the
+ * same string the client received as `accepts[0].extra.resourceId` and
+ * echoes back in X-PAYMENT). Requiring it to appear verbatim in an SPL Memo
+ * on the payment transaction itself binds the payment to the specific
+ * request it's meant to pay for — without this, any confirmed transferChecked
+ * of the right amount to the treasury ATA (a public account, visible to
+ * anyone watching devnet) would satisfy verification for anyone's resourceId,
+ * letting an attacker redeem a stranger's real payment. See DECISIONS.md.
+ */
 export async function verifyPaymentTransaction(
   signature: string,
   expiresAt: number,
+  expectedResourceId: string,
 ): Promise<VerifyResult> {
   const connection = getConnection();
 
@@ -50,6 +82,17 @@ export async function verifyPaymentTransaction(
     ...tx.transaction.message.instructions,
     ...(tx.meta?.innerInstructions?.flatMap((i) => i.instructions) ?? []),
   ];
+
+  const memo = extractMemo(allInstructions);
+  if (memo !== expectedResourceId) {
+    return {
+      ok: false,
+      error:
+        "payment transaction is missing a memo binding it to this resourceId " +
+        "(or it doesn't match) — the memo must contain the exact resourceId " +
+        "string from the 402 response",
+    };
+  }
 
   for (const ix of allInstructions) {
     if (!isParsed(ix)) continue;

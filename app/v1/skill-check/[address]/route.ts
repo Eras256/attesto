@@ -64,8 +64,14 @@ function paymentRequired(address: string) {
             decimals: USDC_DECIMALS,
             note:
               "Send an SPL transferChecked of exactly maxAmountRequired base units " +
-              "of `asset` to `payTo`, wait for confirmation, then retry this exact " +
-              "request with header X-PAYMENT: base64({x402Version,scheme,network," +
+              "of `asset` to `payTo`, in the SAME transaction include an SPL Memo " +
+              "instruction (program MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr) " +
+              "whose data is this exact resourceId string verbatim — payment " +
+              "verification will reject a transaction with no memo or a " +
+              "mismatched one, this is what binds the payment to this specific " +
+              "request instead of any confirmed payment of the right amount. " +
+              "Wait for confirmation, then retry this exact request with header " +
+              "X-PAYMENT: base64({x402Version,scheme,network," +
               "payload:{resourceId,signature}}).",
           },
         },
@@ -178,7 +184,11 @@ export async function GET(
     );
   }
 
-  const paymentCheck = await verifyPaymentTransaction(paymentSignature, challenge.expiresAt);
+  const paymentCheck = await verifyPaymentTransaction(
+    paymentSignature,
+    challenge.expiresAt,
+    xPayment.payload.resourceId,
+  );
   if (!paymentCheck.ok) {
     return NextResponse.json({ error: paymentCheck.error }, { status: 402, headers: corsHeaders() });
   }

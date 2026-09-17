@@ -12,4 +12,6 @@ pub enum AttestoError {
     AlreadyDisputed,
     #[msg("Dispute reason exceeds 200 bytes")]
     ReasonTooLong,
+    #[msg("payment_signature_hash does not match SHA-256(payment_signature)")]
+    PaymentHashMismatch,
 }

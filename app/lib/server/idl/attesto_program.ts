@@ -173,6 +173,50 @@ export type AttestoProgram = {
           }
         },
         {
+          "name": "paymentMarker",
+          "docs": [
+            "Guards against one payment_signature backing more than one receipt.",
+            "Seeded on payment_signature_hash (the caller-supplied SHA-256 of",
+            "payment_signature — 64 bytes exceeds the 32-byte seed limit, and",
+            "Anchor's IDL-build macro can't evaluate a hash() call inline in",
+            "`seeds`, hence precomputing it) and `init`'d in this same instruction,",
+            "so a second concurrent request reusing the same signature fails",
+            "atomically here — see PaymentMarker's doc comment for why this",
+            "replaces the old off-chain getProgramAccounts scan. The handler",
+            "re-derives the hash itself and rejects a mismatch, so a caller can't",
+            "desync the seed from the actual signature being recorded."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  116,
+                  116,
+                  101,
+                  115,
+                  116,
+                  111,
+                  95,
+                  112,
+                  97,
+                  121,
+                  109,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "paymentSignatureHash"
+              }
+            ]
+          }
+        },
+        {
           "name": "issuer",
           "writable": true,
           "signer": true
@@ -212,6 +256,15 @@ export type AttestoProgram = {
               64
             ]
           }
+        },
+        {
+          "name": "paymentSignatureHash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
         }
       ]
     }
@@ -241,6 +294,19 @@ export type AttestoProgram = {
         114,
         23,
         50
+      ]
+    },
+    {
+      "name": "paymentMarker",
+      "discriminator": [
+        253,
+        90,
+        98,
+        11,
+        113,
+        215,
+        74,
+        172
       ]
     }
   ],
@@ -297,6 +363,11 @@ export type AttestoProgram = {
       "code": 6004,
       "name": "reasonTooLong",
       "msg": "Dispute reason exceeds 200 bytes"
+    },
+    {
+      "code": 6005,
+      "name": "paymentHashMismatch",
+      "msg": "payment_signature_hash does not match SHA-256(payment_signature)"
     }
   ],
   "types": [
@@ -479,6 +550,28 @@ export type AttestoProgram = {
             "name": "disputed",
             "type": "bool"
           },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "paymentMarker",
+      "docs": [
+        "Marks one payment_signature as already spent, atomically alongside the",
+        "FulfillmentReceipt it backs. Seeded on hash(payment_signature) rather than",
+        "FulfillmentReceipt's own resource_id seed, so a single confirmed payment",
+        "can never back two different receipts even under concurrent requests: the",
+        "second `init` of this PDA fails outright, same atomicity guarantee that",
+        "already protects against resource_id reuse, closing the read-then-write",
+        "window the old off-chain getProgramAccounts scan (attesto-program.ts's",
+        "findReceiptByPaymentSignature) could not."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
           {
             "name": "bump",
             "type": "u8"

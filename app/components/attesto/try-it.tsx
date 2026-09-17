@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 import { CopyButton } from "./copy-button";
 import { ATTESTO_PROGRAM_ID, explorerUrl } from "@/app/lib/site";
+import { useWallet } from "@/app/lib/wallet/context";
+import { useSendTransaction } from "@/app/lib/hooks/use-send-transaction";
+import { buildAttestoPaymentInstructions } from "@/app/lib/attesto-payment";
+import { WalletButton } from "../wallet-button";
+import type { Address } from "@solana/kit";
 
 const BASE58_RE = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
 
@@ -60,6 +65,8 @@ function useCountdown(expiresAt: number | null) {
 }
 
 export function TryIt() {
+  const { signer, status: walletStatus } = useWallet();
+  const { send, isSending } = useSendTransaction();
   const [address, setAddress] = useState("");
   const [stage, setStage] = useState<Stage>({ step: "address" });
   const [quoteLoading, setQuoteLoading] = useState(false);
@@ -67,6 +74,7 @@ export function TryIt() {
   const [acknowledged, setAcknowledged] = useState(false);
   const [signature, setSignature] = useState("");
   const [verifyError, setVerifyError] = useState<string | null>(null);
+  const [showManualEntry, setShowManualEntry] = useState(false);
 
   const quote = stage.step === "quote" ? stage.quote : null;
   const expiresAt = quote
@@ -143,7 +151,7 @@ export function TryIt() {
     }
   };
 
-  const verifyPayment = async () => {
+  const verifyPayment = async (sig: string) => {
     if (!quote) return;
     setVerifyLoading(true);
     setVerifyError(null);
@@ -152,7 +160,7 @@ export function TryIt() {
         x402Version: 1,
         scheme: "exact",
         network: "solana-devnet",
-        payload: { resourceId: quote.resourceId, signature: signature.trim() },
+        payload: { resourceId: quote.resourceId, signature: sig.trim() },
       };
       const header = btoa(JSON.stringify(payload));
 
@@ -173,6 +181,28 @@ export function TryIt() {
     }
   };
 
+  const payWithWallet = async () => {
+    if (!quote || !signer) return;
+    setVerifyError(null);
+    try {
+      const instructions = buildAttestoPaymentInstructions({
+        payerAddress: signer.address as Address,
+        payTo: quote.payTo,
+        mint: quote.asset,
+        amountAtomic: quote.maxAmountRequired,
+        decimals: quote.decimals,
+        resourceId: quote.resourceId,
+      });
+      const sig = await send({ instructions });
+      setSignature(sig);
+      await verifyPayment(sig);
+    } catch (err) {
+      setVerifyError(
+        err instanceof Error ? err.message : "Payment failed or was rejected.",
+      );
+    }
+  };
+
   return (
     <section id="try-it" className="scroll-mt-20 py-16 md:py-20">
       <div className="mb-10 flex flex-col gap-2">
@@ -180,9 +210,9 @@ export function TryIt() {
           Try it
         </h2>
         <p className="max-w-2xl text-foreground/60">
-          The full flow, live against devnet. No account or sign-in — pay from
-          any Solana devnet address you already control and paste back the
-          signature.
+          The full flow, live against devnet. Connect a devnet wallet with
+          USDC and pay in one click, or build the transaction yourself — the
+          API reference below has the exact recipe.
         </p>
       </div>
 
@@ -261,13 +291,13 @@ export function TryIt() {
               </div>
 
               <p className="text-sm leading-relaxed text-foreground/60">
-                Send exactly this amount as a{" "}
+                Paying with a connected wallet sends a{" "}
                 <code className="rounded bg-cream px-1 py-0.5">
                   transferChecked
                 </code>{" "}
-                instruction to the address above, from any devnet address you
-                hold the key for. Once confirmed, paste the transaction
-                signature below.
+                plus a memo binding the payment to this exact quote — required
+                so a payment can only ever be redeemed for the request it was
+                made for.
               </p>
             </div>
 
@@ -298,37 +328,72 @@ export function TryIt() {
               </p>
             )}
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-              <label className="flex flex-1 flex-col gap-2">
-                <span className="text-sm font-medium">
-                  Confirmed transaction signature
+            {walletStatus === "connected" ? (
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <button
+                  onClick={payWithWallet}
+                  disabled={
+                    !acknowledged || expired || isSending || verifyLoading
+                  }
+                  className="cursor-pointer rounded-lg bg-primary px-4 py-2 text-sm font-semibold whitespace-nowrap text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isSending
+                    ? "Confirm in wallet…"
+                    : verifyLoading
+                      ? "Verifying…"
+                      : `Pay ${formatUsdc(quote.maxAmountRequired, quote.decimals)} USDC & get attestation`}
+                </button>
+                <WalletButton />
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <span className="text-sm text-foreground/60">
+                  Connect a devnet wallet with USDC to pay:
                 </span>
-                <input
-                  value={signature}
-                  onChange={(e) => {
-                    setSignature(e.target.value);
-                    if (verifyError) setVerifyError(null);
-                  }}
-                  placeholder="Base58 transaction signature"
-                  disabled={!acknowledged || expired}
-                  className="rounded-lg border border-border-low bg-background px-3 py-2 font-mono text-sm outline-none focus:border-foreground/30 disabled:opacity-50"
-                />
-              </label>
-              <button
-                onClick={verifyPayment}
-                disabled={
-                  !acknowledged ||
-                  expired ||
-                  verifyLoading ||
-                  signature.trim().length === 0
-                }
-                className="cursor-pointer rounded-lg bg-primary px-4 py-2 text-sm font-semibold whitespace-nowrap text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {verifyLoading
-                  ? "Verifying…"
-                  : "Verify payment & get attestation"}
-              </button>
-            </div>
+                <WalletButton />
+              </div>
+            )}
+
+            <button
+              onClick={() => setShowManualEntry((v) => !v)}
+              className="cursor-pointer self-start text-xs text-foreground/50 underline underline-offset-2 hover:text-foreground"
+            >
+              {showManualEntry
+                ? "Hide manual entry"
+                : "I already paid and have a transaction signature"}
+            </button>
+
+            {showManualEntry && (
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                <label className="flex flex-1 flex-col gap-2">
+                  <span className="text-sm font-medium">
+                    Confirmed transaction signature
+                  </span>
+                  <input
+                    value={signature}
+                    onChange={(e) => {
+                      setSignature(e.target.value);
+                      if (verifyError) setVerifyError(null);
+                    }}
+                    placeholder="Base58 transaction signature"
+                    disabled={!acknowledged || expired}
+                    className="rounded-lg border border-border-low bg-background px-3 py-2 font-mono text-sm outline-none focus:border-foreground/30 disabled:opacity-50"
+                  />
+                </label>
+                <button
+                  onClick={() => verifyPayment(signature)}
+                  disabled={
+                    !acknowledged ||
+                    expired ||
+                    verifyLoading ||
+                    signature.trim().length === 0
+                  }
+                  className="cursor-pointer rounded-lg border border-border-low bg-card px-4 py-2 text-sm font-semibold whitespace-nowrap transition hover:bg-cream disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {verifyLoading ? "Verifying…" : "Verify this signature"}
+                </button>
+              </div>
+            )}
 
             <div className="flex gap-4 text-xs">
               {expired && (

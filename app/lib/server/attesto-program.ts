@@ -1,6 +1,7 @@
 import { AnchorProvider, Program } from "@coral-xyz/anchor";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 import { Connection, PublicKey } from "@solana/web3.js";
+import { createHash } from "crypto";
 import bs58 from "bs58";
 import idl from "./idl/attesto_program.json";
 import type { AttestoProgram } from "./idl/attesto_program";
@@ -107,6 +108,9 @@ export async function recordFulfillmentAttestation(
   const issuer = getIssuerKeypair();
   const receipt = deriveReceiptPda(args.resourceId);
   const paymentSigBytes = Array.from(bs58.decode(args.paymentSignature));
+  const paymentSigHash = Array.from(
+    createHash("sha256").update(Buffer.from(paymentSigBytes)).digest()
+  );
 
   const signature = await program.methods
     .recordFulfillmentAttestation(
@@ -114,13 +118,15 @@ export async function recordFulfillmentAttestation(
       args.payer,
       args.checkedAddress,
       args.score,
-      paymentSigBytes
+      paymentSigBytes,
+      paymentSigHash
     )
-    // `receipt` and `systemProgram` are omitted on purpose, not missing:
-    // the IDL declares `receipt`'s PDA seeds and `systemProgram`'s fixed
-    // address, so Anchor's client resolves both on its own from the
-    // `resourceId` arg above. Passing them explicitly is a type error
-    // against the generated ResolvedAccounts<> type, not just redundant.
+    // `receipt`, `paymentMarker`, and `systemProgram` are omitted on
+    // purpose, not missing: the IDL declares all three accounts' PDA seeds
+    // (or fixed address, for systemProgram), so Anchor's client resolves
+    // them on its own from the args above. Passing them explicitly is a
+    // type error against the generated ResolvedAccounts<> type, not just
+    // redundant.
     .accounts({
       issuer: issuer.publicKey,
     })
