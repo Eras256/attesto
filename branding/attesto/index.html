@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Attesto — Brand Assets Pack</title>
+<link rel="icon" href="svg/favicon.svg">
+<script>
+(function(){
+  try{
+    var t = localStorage.getItem('attesto-theme');
+    if(t){ document.documentElement.setAttribute('data-theme', t); }
+  }catch(e){}
+})();
+</script>
+<style>
+  :root{
+    --page-bg:#F7F5F3; --ink:#161311; --muted:#6B6F7A; --line:#E4E0DA; --panel-bg:#FFFFFF;
+    --navy:#161311; --red:#A56A00; --red-dark:#7A5100;
+  }
+  :root[data-theme="dark"]{ --page-bg:#161311; --ink:#F7F3EC; --muted:#B0A99E; --line:#2E2A25; --panel-bg:#1E1A16; }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --page-bg:#161311; --ink:#F7F3EC; --muted:#B0A99E; --line:#2E2A25; --panel-bg:#1E1A16; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page-bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;padding:0 0 96px;transition:background .15s ease,color .15s ease}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+  .topbar{position:sticky;top:0;z-index:10;background:var(--panel-bg);border-bottom:1px solid var(--line);backdrop-filter:blur(6px)}
+  .topbar-inner{max-width:1080px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;color:var(--ink)}
+  .brand img{width:22px;height:22px}
+  .controls{display:flex;align-items:center;gap:8px}
+  .iconbtn{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;line-height:1}
+  .iconbtn:hover{background:var(--line)}
+  .langpill{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .langpill button{border:none;background:transparent;color:var(--muted);font-size:12.5px;font-weight:600;padding:8px 11px;cursor:pointer}
+  .langpill button[aria-current="true"]{background:var(--red);color:#fff}
+
+  h1{font-size:26px;margin:40px 0 4px}
+  .sub{color:var(--muted);margin:0 0 24px;font-size:15px;max-width:680px}
+  .zip-cta{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:var(--navy);color:#fff;border-radius:14px;padding:24px 28px;margin-bottom:40px}
+  .zip-cta .txt b{display:block;font-size:17px;margin-bottom:4px}
+  .zip-cta .txt span{color:#CBB98A;font-size:13px}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--red);color:#fff;border:none;border-radius:8px;padding:12px 20px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;white-space:nowrap}
+  .btn:hover{background:var(--red-dark)}
+
+  h2{font-size:14px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:44px 0 16px;border-top:1px solid var(--line);padding-top:24px}
+  h2:first-of-type{border-top:none}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+  .card{background:#FFFFFF;border:1px solid #E4E0DA;border-radius:12px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+  .card.dark{background:#161311;border-color:#3A342C}
+  .thumb{height:90px;display:flex;align-items:center;justify-content:center}
+  .thumb img{max-height:90px;max-width:100%}
+  .meta b{display:block;font-size:13.5px;color:#161311}
+  .card.dark .meta b{color:#fff}
+  .meta span{font-size:12px;color:#6B6F7A}
+  .card.dark .meta span{color:#B0A99E}
+  .dl{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--red);text-decoration:none;border:1px solid #E4E0DA;border-radius:6px;padding:7px 12px;width:100%;justify-content:center}
+  .dl:hover{background:#FBF3E2}
+  .card.dark .dl{border-color:#3A342C;color:#D4A72C}
+  .card.dark .dl:hover{background:#2A2118}
+  .checker{background-image:linear-gradient(45deg,#e6e6e6 25%,transparent 25%),linear-gradient(-45deg,#e6e6e6 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e6e6e6 75%),linear-gradient(-45deg,transparent 75%,#e6e6e6 75%);background-size:12px 12px;background-position:0 0,0 6px,6px -6px,-6px 0;border-radius:8px}
+  .notes{color:var(--muted);font-size:13.5px;max-width:680px;line-height:1.6}
+  .flag{background:#3A2A0F;border:1px solid #A56A00;color:#F2D9A0;border-radius:10px;padding:16px 20px;font-size:13.5px;line-height:1.6;max-width:680px;margin-bottom:8px}
+  .misuse-img{width:100%;max-width:900px;border-radius:8px;border:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><img src="svg/favicon.svg" alt=""><span>Attesto Brand Assets</span></div>
+    <div class="controls">
+      <div class="langpill" role="group" aria-label="Language">
+        <button id="langEs" onclick="setLang('es')" aria-current="true">ES</button>
+        <button id="langEn" onclick="setLang('en')" aria-current="false">EN</button>
+      </div>
+      <button class="iconbtn" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">&#9788;</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <h1 data-es="Attesto — Brand Assets Pack" data-en="Attesto — Brand Assets Pack">Attesto — Brand Assets Pack</h1>
+  <p class="sub" data-es="Todo lo necesario para redes, eventos y prensa: vectorial (SVG) y PNG a maxima resolucion. Arrastra el ZIP completo a Drive o descarga los assets que necesites." data-en="Everything you need for social media, events, and press: vector (SVG) and PNG at maximum resolution. Drag the full ZIP into Drive or download whatever assets you need.">Todo lo necesario para redes, eventos y prensa: vectorial (SVG) y PNG a maxima resolucion. Arrastra el ZIP completo a Drive o descarga los assets que necesites.</p>
+
+  <div class="flag" data-es="⚠ Antes de usar esto como el logo real: existe un registro de trademark en USPTO activo para la palabra 'Attesto' en la misma clase de servicios de software (encontrado en el clearance check, no confirmado contra la fuente primaria de USPTO por limitaciones tecnicas — dos busquedas independientes coinciden en el mismo numero de serie). Es una decision de negocio/legal, no algo que este pack resuelva." data-en="⚠ Before shipping this as the real logo: there is an active USPTO trademark registration for the word 'Attesto' in the same software-services class (found during the clearance check, not confirmed against the USPTO primary source due to a tooling limitation — two independent searches agree on the same serial number). This is a business/legal call, not something this pack resolves.">⚠ Antes de usar esto como el logo real: existe un registro de trademark en USPTO activo para la palabra 'Attesto' en la misma clase de servicios de software (encontrado en el clearance check, no confirmado contra la fuente primaria de USPTO por limitaciones tecnicas — dos busquedas independientes coinciden en el mismo numero de serie). Es una decision de negocio/legal, no algo que este pack resuelva.</div>
+
+  <div class="zip-cta">
+    <div class="txt">
+      <b data-es="Pack completo" data-en="Full pack">Pack completo</b>
+      <span data-es="SVG + PNG en todas las resoluciones, listo para subir tal cual a la carpeta de branding en Drive" data-en="SVG + PNG in every resolution, ready to drop straight into a branding folder on Drive">SVG + PNG en todas las resoluciones, listo para subir tal cual a la carpeta de branding en Drive</span>
+    </div>
+    <a class="btn" href="attesto-branding-pack.zip" download><span data-es="Descargar todo (.zip)" data-en="Download all (.zip)">Descargar todo (.zip)</span></a>
+  </div>
+
+  <h2 data-es="El concepto" data-en="The concept">El concepto</h2>
+  <p class="notes" data-es="Una 'A' cuya barra transversal es un checkmark. Todo el producto es eso en una frase: pagas por un check, obtienes una prueba permanente y verificable de que paso. El README.txt explica el porque completo, el benchmark contra Mastercard/Chainlink/Coinbase, y los hallazgos del clearance check." data-en="An 'A' whose crossbar is a checkmark. The whole product is that in one sentence: you pay for a check, you get a permanent, verifiable proof it happened. README.txt has the full reasoning, the benchmark against Mastercard/Chainlink/Coinbase, and the clearance-check findings.">Una 'A' cuya barra transversal es un checkmark. Todo el producto es eso en una frase: pagas por un check, obtienes una prueba permanente y verificable de que paso. El README.txt explica el porque completo, el benchmark contra Mastercard/Chainlink/Coinbase, y los hallazgos del clearance check.</p>
+
+  <h2 data-es="Vector (SVG) — usar siempre que se pueda" data-en="Vector (SVG) — use whenever possible">Vector (SVG) — usar siempre que se pueda</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="thumb"><img style="width:60px" src="svg/logo-mono-light.svg"></div>
+      <div class="meta"><b data-es="Icono, un color" data-en="Icon, single color">Icono, un color</b><span data-es="fondo claro" data-en="light background">fondo claro</span></div>
+      <a class="dl" href="svg/logo-mono-light.svg" download><span data-es="Descargar .svg" data-en="Download .svg">Descargar .svg</span></a>
+    </div>
+    <div class="card dark">
+      <div class="thumb"><img style="width:60px" src="svg/logo-mono-dark.svg"></div>
+      <div class="meta"><b data-es="Icono, un color" data-en="Icon, single color">Icono, un color</b><span data-es="fondo oscuro" data-en="dark background">fondo oscuro</span></div>
+      <a class="dl" href="svg/logo-mono-dark.svg" download><span data-es="Descargar .svg" data-en="Download .svg">Descargar .svg</span></a>
+    </div>
+    <div class="card">
+      <div class="thumb"><img style="width:60px" src="svg/logo-featured-light.svg"></div>
+      <div class="meta"><b data-es="Icono, dos colores" data-en="Icon, two colors">Icono, dos colores</b><span data-es="check en dorado, fondo claro" data-en="gold check, light bg">check en dorado, fondo claro</span></div>
+      <a class="dl" href="svg/logo-featured-light.svg" download><span data-es="Descargar .svg" data-en="Download .svg">Descargar .svg</span></a>
+    </div>
+    <div class="card dark">
+      <div class="thumb"><img style="width:60px" src="svg/logo-featured-dark.svg"></div>
+      <div class="meta"><b data-es="Icono, dos colores" data-en="Icon, two colors">Icono, dos colores</b><span data-es="check en dorado, fondo oscuro" data-en="gold check, dark bg">check en dorado, fondo oscuro</span></div>
+      <a class="dl" href="svg/logo-featured-dark.svg" download><span data-es="Descargar .svg" data-en="Download .svg">Descargar .svg</span></a>
+    </div>
+    <div class="card">
+      <div class="thumb"><img style="width:60px" src="svg/logo-hero-light.svg"></div>
+      <div class="meta"><b data-es="Version 'sellada'" data-en="'Sealed' version">Version 'sellada'</b><span data-es="avatar, OG, moments grandes" data-en="avatar, OG, hero moments">avatar, OG, moments grandes</span></div>
+      <a class="dl" href="svg/logo-hero-light.svg" download><span data-es="Descargar .svg" data-en="Download .svg">Descargar .svg</span></a>
+    </div>
+    <div class="card dark">
+      <div class="thumb"><img style="width:60px" src="svg/logo-hero-dark.svg"></div>
+      <div class="meta"><b data-es="Version 'sellada'" data-en="'Sealed' version">Version 'sellada'</b><span data-es="fondo oscuro" data-en="dark background">fondo oscuro</span></div>
+      <a class="dl" href="svg/logo-hero-dark.svg" download><span data-es="Descargar .svg" data-en="Download .svg">Descargar .svg</span></a>
+    </div>
+    <div class="card">
+      <div class="thumb"><img style="width:100%" src="svg/logo-lockup-light.svg"></div>
+      <div class="meta"><b>Lockup</b><span data-es="icono + wordmark, claro" data-en="icon + wordmark, light">icono + wordmark, claro</span></div>
+      <a class="dl" href="svg/logo-lockup-light.svg" download><span data-es="Descargar .svg" data-en="Download .svg">Descargar .svg</span></a>
+    </div>
+    <div class="card dark">
+      <div class="thumb"><img style="width:100%" src="svg/logo-lockup-dark.svg"></div>
+      <div class="meta"><b>Lockup</b><span data-es="icono + wordmark, oscuro" data-en="icon + wordmark, dark">icono + wordmark, oscuro</span></div>
+      <a class="dl" href="svg/logo-lockup-dark.svg" download><span data-es="Descargar .svg" data-en="Download .svg">Descargar .svg</span></a>
+    </div>
+    <div class="card dark">
+      <div class="thumb"><img style="width:140px" src="svg/badge-verified.svg"></div>
+      <div class="meta"><b data-es="Badge embebible" data-en="Embeddable badge">Badge embebible</b><span data-es="'Verified by Attesto'" data-en="'Verified by Attesto'">'Verified by Attesto'</span></div>
+      <a class="dl" href="svg/badge-verified.svg" download><span data-es="Descargar .svg" data-en="Download .svg">Descargar .svg</span></a>
+    </div>
+    <div class="card">
+      <div class="thumb"><img style="width:50px" src="svg/favicon.svg"></div>
+      <div class="meta"><b data-es="Favicon" data-en="Favicon">Favicon</b><span>16-512px</span></div>
+      <a class="dl" href="svg/favicon.svg" download><span data-es="Descargar .svg" data-en="Download .svg">Descargar .svg</span></a>
+    </div>
+  </div>
+
+  <h2 data-es="Avatar para redes sociales (PNG, fondo solido)" data-en="Social media avatar (PNG, solid background)">Avatar para redes sociales (PNG, fondo solido)</h2>
+  <div class="grid">
+    <div class="card dark">
+      <div class="thumb"><img style="width:80px;border-radius:50%" src="png/logo-avatar-ink-800.png"></div>
+      <div class="meta"><b>800x800</b><span>Twitter/X, Discord, LinkedIn</span></div>
+      <a class="dl" href="png/logo-avatar-ink-800.png" download><span data-es="Descargar .png" data-en="Download .png">Descargar .png</span></a>
+    </div>
+    <div class="card dark">
+      <div class="thumb"><img style="width:80px;border-radius:50%" src="png/logo-avatar-ink-1600.png"></div>
+      <div class="meta"><b>1600x1600</b><span data-es="maxima resolucion" data-en="maximum resolution">maxima resolucion</span></div>
+      <a class="dl" href="png/logo-avatar-ink-1600.png" download><span data-es="Descargar .png" data-en="Download .png">Descargar .png</span></a>
+    </div>
+  </div>
+
+  <h2 data-es="Icono transparente (PNG)" data-en="Transparent icon (PNG)">Icono transparente (PNG)</h2>
+  <div class="grid">
+    <div class="card checker"><div class="thumb"><img style="width:70px" src="png/logo-icon-light-512.png"></div><div class="meta"><b>512x512</b></div><a class="dl" href="png/logo-icon-light-512.png" download><span data-es="Descargar .png" data-en="Download .png">Descargar .png</span></a></div>
+    <div class="card checker"><div class="thumb"><img style="width:70px" src="png/logo-icon-light-1024.png"></div><div class="meta"><b>1024x1024</b></div><a class="dl" href="png/logo-icon-light-1024.png" download><span data-es="Descargar .png" data-en="Download .png">Descargar .png</span></a></div>
+    <div class="card checker"><div class="thumb"><img style="width:70px" src="png/logo-icon-light-2048.png"></div><div class="meta"><b>2048x2048</b><span data-es="maxima resolucion" data-en="maximum resolution">maxima resolucion</span></div><a class="dl" href="png/logo-icon-light-2048.png" download><span data-es="Descargar .png" data-en="Download .png">Descargar .png</span></a></div>
+    <div class="card" style="background:#161311;"><div class="thumb"><img style="width:70px" src="png/logo-icon-dark-512.png"></div><div class="meta"><b style="color:#fff">512x512</b><span style="color:#B0A99E" data-es="para fondo oscuro" data-en="for dark bg">para fondo oscuro</span></div><a class="dl" style="border-color:#3A342C;color:#D4A72C" href="png/logo-icon-dark-512.png" download><span data-es="Descargar .png" data-en="Download .png">Descargar .png</span></a></div>
+  </div>
+
+  <h2 data-es="Favicon / icono de app (PNG)" data-en="Favicon / app icon (PNG)">Favicon / icono de app (PNG)</h2>
+  <div class="grid">
+    <div class="card"><div class="thumb"><img style="width:16px" src="png/favicon-16.png"></div><div class="meta"><b>16x16</b></div><a class="dl" href="png/favicon-16.png" download><span data-es="Descargar" data-en="Download">Descargar</span></a></div>
+    <div class="card"><div class="thumb"><img style="width:32px" src="png/favicon-32.png"></div><div class="meta"><b>32x32</b></div><a class="dl" href="png/favicon-32.png" download><span data-es="Descargar" data-en="Download">Descargar</span></a></div>
+    <div class="card"><div class="thumb"><img style="width:48px" src="png/favicon-48.png"></div><div class="meta"><b>48x48</b></div><a class="dl" href="png/favicon-48.png" download><span data-es="Descargar" data-en="Download">Descargar</span></a></div>
+    <div class="card"><div class="thumb"><img style="width:64px" src="png/favicon-180.png"></div><div class="meta"><b>180x180</b><span>apple touch icon</span></div><a class="dl" href="png/favicon-180.png" download><span data-es="Descargar" data-en="Download">Descargar</span></a></div>
+    <div class="card"><div class="thumb"><img style="width:70px" src="png/favicon-512.png"></div><div class="meta"><b>512x512</b><span>PWA / app icon</span></div><a class="dl" href="png/favicon-512.png" download><span data-es="Descargar" data-en="Download">Descargar</span></a></div>
+    <div class="card"><div class="thumb"><img style="width:70px" src="png/favicon.ico"></div><div class="meta"><b>favicon.ico</b><span data-es="multi-resolucion" data-en="multi-resolution">multi-resolucion</span></div><a class="dl" href="png/favicon.ico" download><span data-es="Descargar" data-en="Download">Descargar</span></a></div>
+  </div>
+
+  <h2 data-es="Logo completo y banner social (PNG)" data-en="Full logo and social banner (PNG)">Logo completo y banner social (PNG)</h2>
+  <div class="grid">
+    <div class="card checker">
+      <div class="thumb"><img style="width:100%" src="png/logo-lockup-light-1600.png"></div>
+      <div class="meta"><b>Lockup 1600px</b><span data-es="transparente" data-en="transparent">transparente</span></div>
+      <a class="dl" href="png/logo-lockup-light-1600.png" download><span data-es="Descargar .png" data-en="Download .png">Descargar .png</span></a>
+    </div>
+    <div class="card dark">
+      <div class="thumb"><img style="width:100%" src="png/logo-lockup-dark-1600.png"></div>
+      <div class="meta"><b>Lockup 1600px</b><span data-es="transparente, fondo oscuro" data-en="transparent, dark bg">transparente, fondo oscuro</span></div>
+      <a class="dl" href="png/logo-lockup-dark-1600.png" download><span data-es="Descargar .png" data-en="Download .png">Descargar .png</span></a>
+    </div>
+    <div class="card dark">
+      <div class="thumb"><img style="width:100%" src="png/social-og-banner-1200x630.png"></div>
+      <div class="meta"><b data-es="Banner social 1200x630" data-en="Social banner 1200x630">Banner social 1200x630</b><span data-es="preview de link (Twitter/LinkedIn/Slack)" data-en="link preview (Twitter/LinkedIn/Slack)">preview de link (Twitter/LinkedIn/Slack)</span></div>
+      <a class="dl" href="png/social-og-banner-1200x630.png" download><span data-es="Descargar .png" data-en="Download .png">Descargar .png</span></a>
+    </div>
+  </div>
+
+  <h2 data-es="Guia de construccion y mal uso" data-en="Construction and misuse guide">Guia de construccion y mal uso</h2>
+  <img class="misuse-img" src="construction-misuse-guide.png" alt="Construction and misuse examples">
+
+  <h2 data-es="Notas" data-en="Notes">Notas</h2>
+  <p class="notes" data-es="El README.txt dentro del ZIP explica que archivo usar en cada caso. Pendientes reales, sin maquillar: el wordmark en los SVG usa texto vivo en Inter (no convertido a paths — funciona perfecto en el sitio real, que ya usa Inter, pero no es 100% independiente de fuente para contextos raros como impresion sin internet); y el clearance check de nombre/marca es un hallazgo de riesgo, no un veredicto legal." data-en="README.txt inside the ZIP explains which file to use for each case. Real pending items, not glossed over: the wordmark in the SVGs uses live Inter text (not converted to paths — works perfectly on the real site, which already uses Inter, but isn't 100% font-independent for edge cases like offline print); and the name/trademark clearance check is a risk finding, not a legal verdict.">El README.txt dentro del ZIP explica que archivo usar en cada caso. Pendientes reales, sin maquillar: el wordmark en los SVG usa texto vivo en Inter (no convertido a paths — funciona perfecto en el sitio real, que ya usa Inter, pero no es 100% independiente de fuente para contextos raros como impresion sin internet); y el clearance check de nombre/marca es un hallazgo de riesgo, no un veredicto legal.</p>
+</div>
+
+<script>
+function isDark(){
+  var t = document.documentElement.getAttribute('data-theme');
+  if(t) return t === 'dark';
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+function updateThemeIcon(){
+  var btn = document.getElementById('themeToggle');
+  if(btn) btn.innerHTML = isDark() ? '&#9728;' : '&#9789;';
+}
+function toggleTheme(){
+  var next = isDark() ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try{ localStorage.setItem('attesto-theme', next); }catch(e){}
+  updateThemeIcon();
+}
+function setLang(lang){
+  document.querySelectorAll('[data-es]').forEach(function(el){
+    var v = lang === 'en' ? el.getAttribute('data-en') : el.getAttribute('data-es');
+    if(v !== null) el.textContent = v;
+  });
+  document.documentElement.setAttribute('lang', lang);
+  try{ localStorage.setItem('attesto-lang', lang); }catch(e){}
+  var esBtn = document.getElementById('langEs'), enBtn = document.getElementById('langEn');
+  if(esBtn && enBtn){
+    esBtn.setAttribute('aria-current', lang === 'es' ? 'true' : 'false');
+    enBtn.setAttribute('aria-current', lang === 'en' ? 'true' : 'false');
+  }
+}
+(function(){
+  updateThemeIcon();
+  var savedLang = null;
+  try{ savedLang = localStorage.getItem('attesto-lang'); }catch(e){}
+  var lang = savedLang || (navigator.language && navigator.language.toLowerCase().indexOf('en') === 0 ? 'en' : 'es');
+  setLang(lang);
+})();
+</script>
+</body>
+</html>

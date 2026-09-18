@@ -1,0 +1,5 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Attesto">
+  <line x1="60" y1="14" x2="18" y2="106" stroke="#161311" stroke-width="16" stroke-linecap="round"/>
+  <line x1="60" y1="14" x2="102" y2="106" stroke="#161311" stroke-width="16" stroke-linecap="round"/>
+  <path d="M 44 66 L 53 78 L 78 50" fill="none" stroke="#A56A00" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
