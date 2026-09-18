@@ -1,0 +1,9 @@
+<svg width="200" height="56" viewBox="0 0 200 56" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Verified by Attesto">
+  <rect x="1" y="1" width="198" height="54" rx="27" fill="#161311" stroke="#A56A00" stroke-width="1.5"/>
+  <g transform="translate(14,10) scale(0.30)">
+    <line x1="60" y1="14" x2="18" y2="106" stroke="#F7F3EC" stroke-width="16" stroke-linecap="round"/>
+    <line x1="60" y1="14" x2="102" y2="106" stroke="#F7F3EC" stroke-width="16" stroke-linecap="round"/>
+    <path d="M 44 66 L 53 78 L 78 50" fill="none" stroke="#A56A00" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="48" y="34" font-family="Inter, system-ui, sans-serif" font-weight="600" font-size="17" fill="#F7F3EC">Verified by Attesto</text>
+</svg>

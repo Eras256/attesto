@@ -24,7 +24,16 @@ const nextConfig: NextConfig = {
           destination: `${ATTESTO_BACKEND_URL}/v1/:path*`,
         },
       ],
-      afterFiles: [],
+      // /branding-attesto (no trailing file) -> the static download page in
+      // public/branding-attesto/. Next.js serves public/ files at their
+      // exact path but doesn't auto-resolve a bare directory to its
+      // index.html, so this rewrite is what makes the bare URL work.
+      afterFiles: [
+        {
+          source: "/branding-attesto",
+          destination: "/branding-attesto/index.html",
+        },
+      ],
       fallback: [],
     };
   },
