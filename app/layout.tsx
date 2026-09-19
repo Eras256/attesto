@@ -26,9 +26,21 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   icons: {
-    icon: "/icon.svg",
-    shortcut: "/icon.svg",
-    apple: "/icon.svg",
+    icon: [
+      { url: "/branding-attesto/svg/favicon.svg", type: "image/svg+xml" },
+      {
+        url: "/branding-attesto/png/favicon-32.png",
+        sizes: "32x32",
+        type: "image/png",
+      },
+      {
+        url: "/branding-attesto/png/favicon-16.png",
+        sizes: "16x16",
+        type: "image/png",
+      },
+    ],
+    shortcut: "/branding-attesto/png/favicon-32.png",
+    apple: "/branding-attesto/png/favicon-180.png",
   },
   openGraph: {
     title: "Attesto — on-chain skill oracle for autonomous agents",
@@ -36,11 +48,19 @@ export const metadata: Metadata = {
     url: SITE_URL,
     siteName: "Attesto",
     type: "website",
+    images: [
+      {
+        url: "/branding-attesto/png/social-og-banner-1200x630.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Attesto — on-chain skill oracle for autonomous agents",
     description: SITE_DESCRIPTION,
+    images: ["/branding-attesto/png/social-og-banner-1200x630.png"],
   },
 };
 
