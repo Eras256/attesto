@@ -41,6 +41,9 @@ export function Hero() {
       <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-[1.3fr_1fr]">
         <div className="flex flex-col gap-6">
           <span className="inline-flex w-fit items-center gap-2 rounded-full border border-border-low bg-card px-3 py-1 text-xs font-medium text-foreground/60">
+            {/* Solana green, kept deliberately: this dot names the Solana
+                ecosystem, not Attesto's own mark — gold stays reserved for
+                Attesto's "verified" meaning, not overloaded as a status light. */}
             <span className="size-1.5 rounded-full bg-[#14F195]" />
             Live on Solana devnet
           </span>

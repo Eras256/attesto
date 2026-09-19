@@ -73,7 +73,7 @@ export function ApiReference() {
         {ENDPOINTS.map((endpoint) => (
           <div
             key={endpoint.path}
-            className="rounded-2xl border border-border-low bg-card p-5"
+            className="min-w-0 rounded-2xl border border-border-low bg-card p-5"
           >
             <div className="mb-3 flex flex-wrap items-center gap-3">
               <span className="rounded-md bg-cream px-2 py-1 font-mono text-xs font-bold">

@@ -48,6 +48,7 @@ export function LiveActivity() {
             Live activity
           </h2>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border-low bg-card px-2.5 py-1 text-xs font-medium text-foreground/60">
+            {/* Solana green kept deliberately here too — see hero.tsx. */}
             <span className="size-1.5 animate-pulse rounded-full bg-[#14F195]" />
             Solana devnet — real data, not simulated
           </span>

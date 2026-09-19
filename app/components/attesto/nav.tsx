@@ -3,6 +3,7 @@ import { ThemeToggle } from "../theme-toggle";
 import { GITHUB_URL } from "@/app/lib/site";
 
 const LINKS = [
+  { href: "/", label: "Home" },
   { href: "#how-it-works", label: "How it works" },
   { href: "#live-activity", label: "Live activity" },
   { href: "#try-it", label: "Try it" },
