@@ -17,21 +17,26 @@ const nextConfig: NextConfig = {
   // Keeps a single public domain matching the API reference docs, without
   // duplicating ATTESTO_HMAC_SECRET/ATTESTO_ISSUER_SECRET_KEY on Vercel.
   // Only applied on Vercel: this same standalone build also runs directly
-  // on Fly (attesto-api.fly.dev, FLY_APP_NAME set there), and an
-  // unconditional rewrite would proxy that machine's own /v1/* requests
-  // back to itself -- a self-loop (real incident: "socket hang up"/
-  // ECONNRESET on every /v1/* request after adding middleware.ts made this
-  // surface). On Fly, the real route.ts handlers must serve /v1/* directly.
+  // on Fly (attesto-api.fly.dev), and an unconditional rewrite would proxy
+  // that machine's own /v1/* requests back to itself -- a self-loop (real
+  // incident: every /v1/* request hung with "socket hang up"/ECONNRESET
+  // after adding middleware.ts made this surface). Checking FLY_APP_NAME
+  // here does NOT work like it does in middleware.ts: rewrites() is
+  // evaluated at build time (baked into routes-manifest.json), and the
+  // Docker build step (`npm run build` in Dockerfile) never has
+  // FLY_APP_NAME set -- that var is injected only into the running Fly
+  // Machine, not the build. VERCEL is set during Vercel's own build, same
+  // signal already used for `output` above, so check for that instead.
   async rewrites() {
     return {
-      beforeFiles: process.env.FLY_APP_NAME
-        ? []
-        : [
+      beforeFiles: process.env.VERCEL
+        ? [
             {
               source: "/v1/:path*",
               destination: `${ATTESTO_BACKEND_URL}/v1/:path*`,
             },
-          ],
+          ]
+        : [],
       // /branding-attesto (no trailing file) -> the static download page in
       // public/branding-attesto/. Next.js serves public/ files at their
       // exact path but doesn't auto-resolve a bare directory to its
