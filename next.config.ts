@@ -16,14 +16,22 @@ const nextConfig: NextConfig = {
   // first (they still exist in this codebase) and the rewrite never fires.
   // Keeps a single public domain matching the API reference docs, without
   // duplicating ATTESTO_HMAC_SECRET/ATTESTO_ISSUER_SECRET_KEY on Vercel.
+  // Only applied on Vercel: this same standalone build also runs directly
+  // on Fly (attesto-api.fly.dev, FLY_APP_NAME set there), and an
+  // unconditional rewrite would proxy that machine's own /v1/* requests
+  // back to itself -- a self-loop (real incident: "socket hang up"/
+  // ECONNRESET on every /v1/* request after adding middleware.ts made this
+  // surface). On Fly, the real route.ts handlers must serve /v1/* directly.
   async rewrites() {
     return {
-      beforeFiles: [
-        {
-          source: "/v1/:path*",
-          destination: `${ATTESTO_BACKEND_URL}/v1/:path*`,
-        },
-      ],
+      beforeFiles: process.env.FLY_APP_NAME
+        ? []
+        : [
+            {
+              source: "/v1/:path*",
+              destination: `${ATTESTO_BACKEND_URL}/v1/:path*`,
+            },
+          ],
       // /branding-attesto (no trailing file) -> the static download page in
       // public/branding-attesto/. Next.js serves public/ files at their
       // exact path but doesn't auto-resolve a bare directory to its
