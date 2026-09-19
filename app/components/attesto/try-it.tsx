@@ -273,18 +273,30 @@ export function TryIt() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs text-foreground/50">Pay to</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs">{quote.payTo}</span>
+                  <span className="shrink-0 text-xs text-foreground/50">
+                    Pay to
+                  </span>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span
+                      className="truncate font-mono text-xs"
+                      title={quote.payTo}
+                    >
+                      {quote.payTo}
+                    </span>
                     <CopyButton value={quote.payTo} />
                   </div>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-xs text-foreground/50">
+                  <span className="shrink-0 text-xs text-foreground/50">
                     USDC mint (devnet)
                   </span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs">{quote.asset}</span>
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span
+                      className="truncate font-mono text-xs"
+                      title={quote.asset}
+                    >
+                      {quote.asset}
+                    </span>
                     <CopyButton value={quote.asset} />
                   </div>
                 </div>
@@ -458,7 +470,7 @@ export function TryIt() {
 
             <div className="flex flex-col gap-2 rounded-xl bg-cream p-4 text-sm">
               <div className="flex items-center justify-between gap-3">
-                <span className="text-xs text-foreground/50">
+                <span className="shrink-0 text-xs text-foreground/50">
                   Fulfillment receipt
                 </span>
                 <a
@@ -467,13 +479,14 @@ export function TryIt() {
                   )}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-mono text-xs underline underline-offset-2 hover:text-foreground"
+                  title={stage.result.attestation.receipt}
+                  className="min-w-0 truncate font-mono text-xs underline underline-offset-2 hover:text-foreground"
                 >
                   {stage.result.attestation.receipt}
                 </a>
               </div>
               <div className="flex items-center justify-between gap-3">
-                <span className="text-xs text-foreground/50">
+                <span className="shrink-0 text-xs text-foreground/50">
                   Attestation transaction
                 </span>
                 <a
