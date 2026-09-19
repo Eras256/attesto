@@ -82,6 +82,53 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+@keyframes hero-ring-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes hero-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.hero-mark-float {
+  animation: hero-float 5s ease-in-out infinite;
+}
+.hero-mark-ring-1 {
+  animation: hero-ring-spin 36s linear infinite;
+}
+.hero-mark-ring-2 {
+  animation: hero-ring-spin 52s linear infinite reverse;
+}
+.hero-mark-glow {
+  animation: hero-glow-pulse 3.5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-mark-float,
+  .hero-mark-ring-1,
+  .hero-mark-ring-2,
+  .hero-mark-glow {
+    animation: none;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-transparent;

@@ -13,7 +13,20 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-20 border-b border-border-low bg-background/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link href="/" className="text-sm font-bold tracking-tight">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-sm font-bold tracking-tight"
+        >
+          <img
+            src="/branding-attesto/svg/logo-mono-light.svg"
+            alt=""
+            className="size-5 dark:hidden"
+          />
+          <img
+            src="/branding-attesto/svg/logo-mono-dark.svg"
+            alt=""
+            className="hidden size-5 dark:block"
+          />
           Attesto
         </Link>
 
