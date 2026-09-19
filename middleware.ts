@@ -11,6 +11,12 @@ import type { NextRequest } from "next/server";
 // several rounds of frontend work). FLY_APP_NAME is set automatically by
 // Fly's own runtime and never set on Vercel, so this only activates on
 // Fly.
+//
+// The exact root ("/") is a special case: it's the URL a machine client
+// (an uptime monitor, a script, another agent) is most likely to probe
+// to check the backend is alive, and a redirect into an HTML page is a
+// bad answer for that caller. Every other stray path (someone finding
+// this URL and browsing to it) still redirects to the real site.
 export function middleware(request: NextRequest) {
   if (!process.env.FLY_APP_NAME) {
     return NextResponse.next();
@@ -19,6 +25,14 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (pathname.startsWith("/v1/")) {
     return NextResponse.next();
+  }
+
+  if (pathname === "/") {
+    return NextResponse.json({
+      status: "online",
+      service: "attesto-api",
+      docs: "https://attesto.xyz",
+    });
   }
 
   return NextResponse.redirect(
