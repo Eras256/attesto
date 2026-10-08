@@ -61,3 +61,8 @@ test-ledger/
 .agents/
 .aider-desk/
 skills-lock.json
+
+# local working notes, kept on disk and not tracked
+AGENTS.md
+docs/CHECKLIST-panel-review.md
+docs/video-script.md

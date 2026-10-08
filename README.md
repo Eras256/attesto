@@ -24,16 +24,29 @@ separate Program ID — see "What's deployed right now" below). See
 prova_program") for why that separation was kept even though the two are
 related.
 
-Built for Crypto World's Fair (Colosseum), Solana track.
+Built for Crypto World's Fair (Colosseum), Solana track. Everything in
+this repo runs on **Solana devnet** — no mainnet deployment exists.
+
+**Development disclosure:** built with AI assistance (Claude Code) under
+the team's direction. Changes were checked against the live site and
+on-chain transactions.
+
+## Links
+
+- **Site:** https://attesto.xyz
+- **API reference:** https://attesto.xyz/#api-reference
+- **Program (devnet):** [`EgLkDDxhS1Cd61VjJzMSURC1zko3xtbcAexQqyGBqvdk`](https://explorer.solana.com/address/EgLkDDxhS1Cd61VjJzMSURC1zko3xtbcAexQqyGBqvdk?cluster=devnet)
+- **Demo video:** _added here once recorded_
+- **Repo:** https://github.com/Eras256/attesto
 
 ## Status
 
-- **Fase 0** (bootstrap) — done.
-- **Fase 1** (pay → verify → attest loop) — done. `GET /v1/skill-check/:address`
+- **Phase 0** (bootstrap) — done.
+- **Phase 1** (pay → verify → attest loop) — done. `GET /v1/skill-check/:address`
   is live against real devnet, x402 flow included.
-- **Fase 2** (disputes + metrics) — done. `POST /v1/disputes` and
+- **Phase 2** (disputes + metrics) — done. `POST /v1/disputes` and
   `GET /v1/metrics` are live against real devnet.
-- **Fase 3** (attesto.xyz frontend) — done. Hero, live activity, Try it,
+- **Phase 3** (attesto.xyz frontend) — done. Hero, live activity, Try it,
   API reference, and legal page are live at attesto.xyz. Full paid
   quote → pay → mint flow verified against real production traffic
   (attesto.xyz → attesto-api.fly.dev) with a funded devnet wallet — see
@@ -103,8 +116,5 @@ cp anchor/target/types/attesto_program.ts app/lib/server/idl/attesto_program.ts
 
 Attesto never accumulates a per-client balance and never intermediates an
 exchange of assets — every request settles atomically and Attesto is paid
-only for its own computation (the score). Keep it that way; see
-`.claude/skills/mexico-legal-check/SKILL.md` before changing anything about
-how payment or settlement works, and avoid "wallet/exchange/custody/broker/
-intermediary/matching engine/deposit/balance" in product copy per that
-skill's guidance.
+only for its own computation (the score). Keep it that way when changing
+anything about how payment or settlement works.
