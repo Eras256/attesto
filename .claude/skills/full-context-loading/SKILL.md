@@ -84,22 +84,22 @@ Verified directly (`ls .claude/skills`, `find ~/.claude/skills`, reading
 the real files) on 2026-09-18. Not copied from any sibling project.
 
 - **This project's own hand-built skills** (`.claude/skills/`):
-  `mexico-legal-check`, `teammate-commit-identity`,
-  `claude-antigravity-setup`, plus this skill, `grants-track-record`,
-  `hackathon-fit-check`, `public-claim-verify`, `repo-security-sweep`,
-  `doc-accuracy-audit`, `portfolio-funding-rollup`,
+  `mexico-legal-check`, `teammate-commit-identity`, plus this skill,
+  `public-claim-verify`, `repo-security-sweep`, `doc-accuracy-audit`,
   `ecosystem-skills-installer` (portable variant — this project is
   individual, not a hub, so it has no `cross-session-hub` or
-  `new-ecosystem-hub`).
+  `new-ecosystem-hub`). A few portfolio-wide meta-skills
+  (grant/hackathon-strategy tooling) were installed here at one point
+  and are deliberately **not** listed — kept local-only and gitignored,
+  not something a public, judged repo's own skill file should name or
+  describe. See the repo-leak memory entry if this needs re-deriving.
 - **Claude's own global skills** (`~/.claude/skills/`) — this machine
-  has other, unrelated Stellar-specific tooling installed globally that
-  is **not scoped to Attesto** (`deploy-stellar-mainnet`, `stellar-help`,
-  `find-stellar-idea`, `stellar-competitive-landscape`, the SCF-*
-  family, etc.) — don't rely on those for Attesto work without
-  rechecking their scope actually applies. Two that ARE genuinely
-  relevant to this project and have already been used successfully
-  this session: `branding-pack` (symlinked from
-  `~/.agents/skills/branding-pack`, used to build
+  has other tooling installed globally that is **not scoped to Attesto**
+  and not named here for the same reason as above — don't rely on
+  anything unlisted for Attesto work without rechecking its scope
+  actually applies. Two that ARE genuinely relevant to this project and
+  have already been used successfully this session: `branding-pack`
+  (symlinked from `~/.agents/skills/branding-pack`, used to build
   `branding/attesto/` and `public/branding-attesto/`) and
   `headless-browser-without-root` (the msedge-via-WSL-interop pattern
   used for that same work's screenshot QA). Generic ones like
@@ -139,8 +139,7 @@ time — regardless of how confidently a prior memory or skill states it.
 
 ## Related
 
-`claude-antigravity-setup` (initial project setup; this skill is the
-ongoing-discipline complement to it), `ecosystem-skills-installer` (how
-the two candidate Solana packages above would get verified further and
-installed), `session-close` (the end-of-session hygiene check that
-keeps this inventory from going stale).
+`ecosystem-skills-installer` (how the two candidate Solana packages
+above would get verified further and installed), `session-close` (the
+end-of-session hygiene check that keeps this inventory from going
+stale).
