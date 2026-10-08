@@ -39,6 +39,18 @@ fusionar los dos "para simplificar" — decisión explícita del usuario
 authority), `attesto-issuer` (firma atestaciones/disputas),
 `attesto-treasury` (recibe pagos). Ver `DECISIONS.md`.
 
+**`anchor test` despliega `attesto_program` a devnet en cada corrida —
+no es un smoke test inofensivo.** `Anchor.toml` apunta `cluster` a
+devnet, así que el comando hace un deploy real (con firma real, costo
+real de SOL) antes de correr el script de test. Confirmado 2026-10-07.
+No correrlo por curiosidad ni justo antes de grabar una demo.
+
+**Cualquier skill o archivo que no sea específico del producto Attesto
+(herramientas de portafolio, configuración compartida entre proyectos)
+se gitignora al instalarse, nunca se trackea por default.** Un repo
+público bajo revisión de jueces se navega directamente — confirmar con
+`git ls-files` antes de dar por hecho que algo quedó fuera.
+
 ## Playbooks de portafolio instalados
 
 Patrón replicado desde un proyecto hermano del portafolio, a pedido
