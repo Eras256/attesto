@@ -54,10 +54,34 @@ real 402 for it):
 - **Attestations landing ~once a minute, still live right now** — the most
   recent one at check time was under 2 minutes old, which caps recency at
   30/30 (`<=30 days` rule).
-- Floor on the final score is therefore **80/100** from volume+recency
-  alone; diversity (0-20) adds on top. This is a real, continuously-active
-  agent in Prova's actual devnet registry, not Attesto's own program (which
-  would show 0/100 — empty, wrong demo).
+- **Correction, 2026-10-07, after actually running the paid flow:** the
+  "80/100 floor" below was computed from the quote response alone — the
+  real score only comes back after payment, and it does NOT come back
+  yet. Running the real pay→verify flow against this address (3/3
+  attempts, each a real 0.01 USDC devnet payment) returned **HTTP 500,
+  empty body** every time — a real production bug, not a fluke: the
+  public devnet RPC rate-limits `getTransactions` for this address's own
+  last-25-signatures batch (confirmed by reproducing the exact RPC call
+  standalone), and `computeSkillCheckScore` had no handling for that,
+  crashing the whole request *after* the payment was already verified
+  and spent. Fixed in `app/lib/server/score.ts` (retries + graceful
+  degrade instead of crash), committed and pushed as `c913ba6` — **but
+  not yet deployed to the live Fly backend** (no deploy access from this
+  session). **Do not record with this address until someone redeploys
+  and a fresh paid run actually returns a score** — the 80/100 figure
+  below is the theoretical ceiling from volume+recency alone, not a
+  confirmed number.
+- Theoretical floor, unconfirmed: volume+recency alone would floor the
+  score at **80/100** (diversity adds 0-20 on top) once the fix is live.
+  This is a real, continuously-active agent in Prova's actual devnet
+  registry, not Attesto's own program (which would show 0/100 — empty,
+  wrong demo).
+- **Fallback if the fix can't be deployed in time:** address
+  `EcxmErSZfYrNVczQK3jAKTExUTKGT5ACq87a9oJYwzYZ` is a real, working, low-
+  traffic Prova agent — confirmed live with an actual paid run, **score
+  37/100** (5 attestations, 70 days since the last one, 1 distinct action
+  type). Real and currently working, but not "high" — only use if the
+  score.ts fix isn't live before recording.
 - **Do not use the Attesto program ID** (`EgLkDDxhS1Cd61VjJzMSURC1zko3xtbcAexQqyGBqvdk`)
   for this — that's Attesto's own program account, has no Prova attestation
   history, and would render the demo's main screen empty.
@@ -143,13 +167,20 @@ real 402 for it):
 submission's own bus-factor point (docs/CHECKLIST-panel-review.md) is
 exactly the thing to make visible here, not just claim in a form field.
 
-**Voiceover:**
-> [Giovanny] — I built the payment verification, the Anchor program, the
-> replay protection.
-> [Monserrat] — I built the product experience you just saw, attesto.xyz,
-> and pushed on the parts that don't survive a real user clicking
-> through them.
->
+**Giovanny's part — voiceover:**
+> I built the payment verification, the Anchor program, the replay
+> protection.
+
+**Monserrat's part — NOT scripted, write it in your own words.** Guide
+questions, answer on camera in English, don't read a script:
+- What did you actually build here — in your own words, not a feature
+  list?
+- What's one thing that broke when a real person (not you) tried to
+  click through the flow, and what did you change because of it?
+- Why does this matter to you — not the pitch-deck version, the real
+  reason?
+
+**Closing line, either founder — voiceover:**
 > Attesto is live on devnet right now, today, at attesto.xyz. We're
 > looking for more real testers outside our own team, and we'd love
 > yours.
@@ -172,8 +203,15 @@ exactly the thing to make visible here, not just claim in a form field.
 - [ ] Record demo against whatever backend is live at record time — the
       payment-error-explanation fix shipped 2026-10-07, confirmed live;
       no other pending backend changes known as of this draft
-- [ ] Fill in Monserrat's own words for her segment — the line above is a
-      placeholder, not something to read verbatim without her sign-off
+- [x] Monserrat's segment is guide questions, not scripted text (see
+      Segment 4) — she answers in her own words on camera
+- [ ] **Blocked on a deploy, not yet verified:** a real scoring crash was
+      found and fixed in `app/lib/server/score.ts` (commit `c913ba6`,
+      pushed to `origin/main`) but **not yet deployed to the live Fly
+      backend** — this session has no `fly deploy` access to `attesto-api`
+      (not visible under this machine's `fly auth`). Someone with access
+      needs to deploy before the chosen demo address is safe to record —
+      see the note under "Demo address" above
 - [ ] Get a real fulfillment receipt + transaction on an explorer queued
       up before recording — the chosen demo address is a live, continuously
       -active account, so a fresh paid skill-check against it will itself
