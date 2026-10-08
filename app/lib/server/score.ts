@@ -1,4 +1,4 @@
-import { PublicKey } from "@solana/web3.js";
+import { Connection, PublicKey } from "@solana/web3.js";
 import { getConnection } from "./attesto-program";
 import { PROVA_PROGRAM_ID } from "./config";
 import { decodeAgentAccount, decodeAttestationsFromLogs } from "./prova-events";
@@ -6,6 +6,43 @@ import { decodeAgentAccount, decodeAttestationsFromLogs } from "./prova-events";
 const AGENT_SEED = Buffer.from("prova_agent");
 const RECENT_SIGNATURES_LIMIT = 25;
 const SECONDS_PER_DAY = 86_400;
+const GET_TRANSACTIONS_RETRIES = 3;
+const GET_TRANSACTIONS_RETRY_DELAY_MS = 400;
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * The public devnet RPC rate-limits `getTransactions` batches hard —
+ * confirmed live 2026-10-07 against a real, continuously-active Prova
+ * agent (one attestation roughly every minute): fetching its own last 25
+ * signatures threw "429 Too Many Requests for a specific RPC call" on
+ * every attempt, uncaught, which crashed the whole skill-check request
+ * with a bare 500 *after* the caller's payment had already been verified
+ * and spent — the worst place for an unhandled RPC hiccup to live. A few
+ * retries absorb the transient case; if it still fails, the caller
+ * degrades to a volume-only score instead of losing the paid request
+ * entirely (see the catch around this call below).
+ */
+async function getTransactionsWithRetry(
+  connection: Connection,
+  signatures: string[],
+) {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < GET_TRANSACTIONS_RETRIES; attempt++) {
+    try {
+      return await connection.getTransactions(signatures, {
+        commitment: "confirmed",
+        maxSupportedTransactionVersion: 0,
+      });
+    } catch (err) {
+      lastError = err;
+      await sleep(GET_TRANSACTIONS_RETRY_DELAY_MS * (attempt + 1));
+    }
+  }
+  throw lastError;
+}
 
 export interface SkillCheckResult {
   found: boolean;
@@ -72,21 +109,28 @@ export async function computeSkillCheckScore(
   let mostRecentTimestamp: number | null = null;
 
   if (signatures.length > 0) {
-    const txs = await connection.getTransactions(
-      signatures.map((s) => s.signature),
-      { commitment: "confirmed", maxSupportedTransactionVersion: 0 },
-    );
+    try {
+      const txs = await getTransactionsWithRetry(
+        connection,
+        signatures.map((s) => s.signature),
+      );
 
-    for (const tx of txs) {
-      const logs = tx?.meta?.logMessages;
-      if (!logs) continue;
-      for (const evt of decodeAttestationsFromLogs(logs)) {
-        if (!evt.agent.equals(agentPda)) continue;
-        actionTypesSeen.add(evt.actionType);
-        if (mostRecentTimestamp === null || evt.timestamp > mostRecentTimestamp) {
-          mostRecentTimestamp = evt.timestamp;
+      for (const tx of txs) {
+        const logs = tx?.meta?.logMessages;
+        if (!logs) continue;
+        for (const evt of decodeAttestationsFromLogs(logs)) {
+          if (!evt.agent.equals(agentPda)) continue;
+          actionTypesSeen.add(evt.actionType);
+          if (mostRecentTimestamp === null || evt.timestamp > mostRecentTimestamp) {
+            mostRecentTimestamp = evt.timestamp;
+          }
         }
       }
+    } catch {
+      // RPC still down after retries — the caller's payment is already
+      // verified and spent at this point, so degrade to a volume-only
+      // score (known from the on-chain agent account itself) instead of
+      // crashing the request and stranding that payment with no result.
     }
   }
 
