@@ -42,49 +42,46 @@ Every claim below is something already true in the shipped product or repo
 ## Demo address — use this, not Attesto's own program
 
 **Use `GoNaEo5bAAFpBADnuqE8E3M3DqCMEcYVE8LzcVxjRNPS`** when pasting into
-"Solana address to check." Verified live 2026-10-07 directly against
-devnet RPC (`getProgramAccounts` on Prova's program
-`G11dBAzLQaADtHHM2AZNz3ThCDnkY5nhX3Ujddu1CMM1`, decoding the real
-`prova_agent` account layout) and cross-checked against the live quote
-endpoint (`curl https://attesto.xyz/v1/skill-check/<address>` returns a
-real 402 for it):
-- **167,117 attestations, not revoked** — caps the volume component at
-  50/50 (formula is `min(count, 20) / 20 * 50`, so this clears it many
-  times over).
-- **Attestations landing ~once a minute, still live right now** — the most
-  recent one at check time was under 2 minutes old, which caps recency at
-  30/30 (`<=30 days` rule).
-- **Correction, 2026-10-07, after actually running the paid flow:** the
-  "80/100 floor" below was computed from the quote response alone — the
-  real score only comes back after payment, and it does NOT come back
-  yet. Running the real pay→verify flow against this address (3/3
-  attempts, each a real 0.01 USDC devnet payment) returned **HTTP 500,
-  empty body** every time — a real production bug, not a fluke: the
-  public devnet RPC rate-limits `getTransactions` for this address's own
-  last-25-signatures batch (confirmed by reproducing the exact RPC call
-  standalone), and `computeSkillCheckScore` had no handling for that,
-  crashing the whole request *after* the payment was already verified
-  and spent. Fixed in `app/lib/server/score.ts` (retries + graceful
-  degrade instead of crash), committed and pushed as `c913ba6` — **but
-  not yet deployed to the live Fly backend** (no deploy access from this
-  session). **Do not record with this address until someone redeploys
-  and a fresh paid run actually returns a score** — the 80/100 figure
-  below is the theoretical ceiling from volume+recency alone, not a
-  confirmed number.
-- Theoretical floor, unconfirmed: volume+recency alone would floor the
-  score at **80/100** (diversity adds 0-20 on top) once the fix is live.
-  This is a real, continuously-active agent in Prova's actual devnet
-  registry, not Attesto's own program (which would show 0/100 — empty,
-  wrong demo).
-- **Fallback if the fix can't be deployed in time:** address
-  `EcxmErSZfYrNVczQK3jAKTExUTKGT5ACq87a9oJYwzYZ` is a real, working, low-
-  traffic Prova agent — confirmed live with an actual paid run, **score
-  37/100** (5 attestations, 70 days since the last one, 1 distinct action
-  type). Real and currently working, but not "high" — only use if the
-  score.ts fix isn't live before recording.
-- **Do not use the Attesto program ID** (`EgLkDDxhS1Cd61VjJzMSURC1zko3xtbcAexQqyGBqvdk`)
-  for this — that's Attesto's own program account, has no Prova attestation
-  history, and would render the demo's main screen empty.
+"Solana address to check." **Confirmed safe to record with, 2026-10-07:**
+ran the real pay→verify flow against production (`attesto.xyz`, a real
+0.01 USDC devnet payment) after the dedicated Helius devnet RPC went live
+(Fly app version 9) and got back:
+
+```
+HTTP 200
+score: 97/100
+breakdown: { volume: 50, recency: 30, diversity: 17.1 }
+attestationCount: 167168
+distinctActionTypes: 6
+mostRecentAttestationDaysAgo: 0
+degraded: false
+```
+
+This is the real, complete number — not the quote-derived estimate from
+earlier drafts of this doc, and not degraded (recency/diversity are
+genuinely populated, not zeroed out from an RPC failure). Receipt and
+transaction both minted on-chain for that run
+(`8K2eY1U9ZmkbECxuJNNNuZ4LJjmoRhFXQk2Zn2q8aARy` /
+`oFMzKF9FjgGZNWRf65LgWCb2ckQKFEqhJ52tbLsgLfvH4K92NyPy1ENCQEdqUR6Pdji4Yq8c9bXpmscjbhg9vZj`)
+— don't reuse that exact receipt in the recording, a fresh paid run
+during the actual take will mint its own, same as every other real
+tester gets.
+
+**Earlier in the same day this address 500'd, then silently degraded to
+50/100** before the fix (`c913ba6`/`cb43b2d`) and the dedicated RPC
+landed — see `[[project_attesto_fase3_infra]]`'s 2026-10-07 entry for
+that whole story if it matters later. Not relevant anymore for recording
+purposes now that the real run above is confirmed complete and high.
+
+**Fallback, still real if ever needed:** `EcxmErSZfYrNVczQK3jAKTExUTKGT5ACq87a9oJYwzYZ`,
+confirmed score 37/100 (5 attestations, low traffic) — not needed now
+that the primary address scores 97/100 for real, keeping the note in
+case the primary address's live traffic ever changes its profile before
+the actual recording.
+
+**Do not use the Attesto program ID** (`EgLkDDxhS1Cd61VjJzMSURC1zko3xtbcAexQqyGBqvdk`)
+for this — that's Attesto's own program account, has no Prova attestation
+history, and would render the demo's main screen empty.
 
 ---
 
@@ -205,13 +202,10 @@ questions, answer on camera in English, don't read a script:
       no other pending backend changes known as of this draft
 - [x] Monserrat's segment is guide questions, not scripted text (see
       Segment 4) — she answers in her own words on camera
-- [ ] **Blocked on a deploy, not yet verified:** a real scoring crash was
-      found and fixed in `app/lib/server/score.ts` (commit `c913ba6`,
-      pushed to `origin/main`) but **not yet deployed to the live Fly
-      backend** — this session has no `fly deploy` access to `attesto-api`
-      (not visible under this machine's `fly auth`). Someone with access
-      needs to deploy before the chosen demo address is safe to record —
-      see the note under "Demo address" above
+- [x] Scoring crash fixed (`c913ba6`/`cb43b2d`), dedicated Helius devnet
+      RPC live (`SOLANA_RPC_URL`, Fly version 9), and the demo address
+      confirmed with a real paid run: **score 97/100, `degraded: false`**
+      — see "Demo address" above. Safe to record with.
 - [ ] Get a real fulfillment receipt + transaction on an explorer queued
       up before recording — the chosen demo address is a live, continuously
       -active account, so a fresh paid skill-check against it will itself
