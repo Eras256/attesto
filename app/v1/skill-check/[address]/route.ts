@@ -221,6 +221,13 @@ export async function GET(
       distinctActionTypes: result.distinctActionTypes,
       mostRecentAttestationDaysAgo: result.mostRecentAttestationDaysAgo,
       breakdown: result.breakdown,
+      degraded: result.degraded,
+      ...(result.degraded && {
+        warning:
+          "Partial score — the on-chain history lookup was rate-limited, " +
+          "so this reflects volume only; recency and diversity are shown " +
+          "as zero, not actually zero.",
+      }),
       attestation: {
         program: "EgLkDDxhS1Cd61VjJzMSURC1zko3xtbcAexQqyGBqvdk",
         receipt: attestation.receipt.toBase58(),

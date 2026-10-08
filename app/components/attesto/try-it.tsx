@@ -31,6 +31,8 @@ interface SkillCheckResult {
   distinctActionTypes: number;
   mostRecentAttestationDaysAgo: number | null;
   breakdown: { volume: number; recency: number; diversity: number };
+  degraded?: boolean;
+  warning?: string;
   attestation: {
     program: string;
     receipt: string;
@@ -526,6 +528,15 @@ export function TryIt() {
                 </span>
               </span>
             </div>
+
+            {stage.result.degraded && (
+              <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                Partial score — the on-chain history lookup was rate-limited,
+                so recency and diversity below show as zero rather than their
+                real values. Volume is still accurate. Try again shortly for
+                the full picture.
+              </div>
+            )}
 
             <div className="grid grid-cols-3 gap-3 text-sm">
               <div className="rounded-lg bg-cream p-3">

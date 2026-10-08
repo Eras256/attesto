@@ -52,6 +52,14 @@ export interface SkillCheckResult {
   distinctActionTypes: number;
   mostRecentAttestationDaysAgo: number | null;
   breakdown: { volume: number; recency: number; diversity: number };
+  /**
+   * True when recency/diversity couldn't be computed because the RPC
+   * history lookup failed even after retries — `score`/`breakdown` only
+   * reflect volume in that case, not a full picture. The caller must
+   * surface this, not just the number: a silently partial score reads as
+   * a real low score to anyone who doesn't know to ask.
+   */
+  degraded: boolean;
 }
 
 /**
@@ -84,6 +92,7 @@ export async function computeSkillCheckScore(
       distinctActionTypes: 0,
       mostRecentAttestationDaysAgo: null,
       breakdown: { volume: 0, recency: 0, diversity: 0 },
+      degraded: false,
     };
   }
 
@@ -98,6 +107,7 @@ export async function computeSkillCheckScore(
       distinctActionTypes: 0,
       mostRecentAttestationDaysAgo: null,
       breakdown: { volume: 0, recency: 0, diversity: 0 },
+      degraded: false,
     };
   }
 
@@ -107,6 +117,7 @@ export async function computeSkillCheckScore(
 
   const actionTypesSeen = new Set<string>();
   let mostRecentTimestamp: number | null = null;
+  let degraded = false;
 
   if (signatures.length > 0) {
     try {
@@ -131,6 +142,8 @@ export async function computeSkillCheckScore(
       // verified and spent at this point, so degrade to a volume-only
       // score (known from the on-chain agent account itself) instead of
       // crashing the request and stranding that payment with no result.
+      // Must be reported to the caller, not just absorbed silently.
+      degraded = true;
     }
   }
 
@@ -160,5 +173,6 @@ export async function computeSkillCheckScore(
       recency: Math.round(recency * 10) / 10,
       diversity: Math.round(diversity * 10) / 10,
     },
+    degraded,
   };
 }
