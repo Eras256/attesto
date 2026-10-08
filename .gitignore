@@ -46,7 +46,14 @@ next-env.d.ts
 
 # solana local validator
 test-ledger/
+
+# portfolio-wide meta-skills: operational/identity detail or grant-and-
+# hackathon strategy framing not meant for a public repo a judge may browse
 .claude/skills/teammate-commit-identity/
+.claude/skills/claude-antigravity-setup/
+.claude/skills/grants-track-record/
+.claude/skills/hackathon-fit-check/
+.claude/skills/portfolio-funding-rollup/
 
 # skill-installer artifacts for other tools (mirrors of .claude/skills/,
 # not content of this project) -- keeps the public repo to what's actually

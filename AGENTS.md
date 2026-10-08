@@ -41,9 +41,10 @@ authority), `attesto-issuer` (firma atestaciones/disputas),
 
 ## Playbooks de portafolio instalados
 
-Patrón replicado desde RFP 1 (`c:\DaAps\RFP 1`), a pedido explícito del
-usuario 2026-09-15. Ver `.claude/skills/claude-antigravity-setup/SKILL.md`
-para el resto del checklist de este patrón.
+Patrón replicado desde un proyecto hermano del portafolio, a pedido
+explícito del usuario 2026-09-15. Ver
+`.claude/skills/claude-antigravity-setup/SKILL.md` para el resto del
+checklist de este patrón.
 
 - `playbooks/continue.md` — retomar sesión sin gastar tokens de más.
 - `playbooks/images.md` — costo real de pegar imágenes/capturas.
