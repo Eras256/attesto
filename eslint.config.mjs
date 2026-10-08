@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Generated Codama files:
     "app/generated/**",
+    // Vendored skill templates/examples, not Attesto's own product code:
+    ".agents/**",
   ]),
 ]);
 

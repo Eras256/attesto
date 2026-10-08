@@ -50,6 +50,56 @@ function formatUsdc(atomic: string, decimals: number): string {
   return (Number(atomic) / 10 ** decimals).toFixed(decimals);
 }
 
+interface FriendlyError {
+  text: string;
+  faucetHref?: string;
+  faucetLabel?: string;
+}
+
+// Wallet-level send failures (thrown by useSendTransaction, before the
+// server ever sees anything) come back as raw Solana/RPC error text —
+// e.g. "Failed to send transaction (preflight): Attempt to debit an
+// account but found no record of a prior credit." for a wallet with no
+// devnet SOL. A judge trying this with a brand-new wallet hits exactly
+// this and has no way to know it means "go get devnet SOL/USDC" — see
+// docs/try-it-guide.md for the same two faucets surfaced here.
+function describeWalletError(err: unknown): FriendlyError {
+  const message = err instanceof Error ? err.message : String(err);
+  const lower = message.toLowerCase();
+
+  if (lower.includes("rejected") || lower.includes("user cancel")) {
+    return { text: "Payment was cancelled in the wallet." };
+  }
+
+  if (
+    lower.includes("no record of a prior credit") ||
+    lower.includes("insufficient lamports") ||
+    lower.includes("insufficient funds for rent")
+  ) {
+    return {
+      text: "This wallet has no devnet SOL to pay the network fee.",
+      faucetHref: "https://faucet.solana.com",
+      faucetLabel: "Get free devnet SOL at faucet.solana.com",
+    };
+  }
+
+  if (
+    lower.includes("custom program error: 0x1") ||
+    lower.includes("insufficient funds") ||
+    lower.includes("tokenerror")
+  ) {
+    return {
+      text: "This wallet has no devnet USDC.",
+      faucetHref: "https://faucet.circle.com",
+      faucetLabel: "Get free devnet USDC at faucet.circle.com (pick Solana Devnet)",
+    };
+  }
+
+  return {
+    text: "Payment failed. If this is a new wallet, make sure it has both devnet SOL and devnet USDC, then try again.",
+  };
+}
+
 function useCountdown(expiresAt: number | null) {
   const [remaining, setRemaining] = useState(() =>
     expiresAt ? Math.max(0, expiresAt - Date.now()) : 0
@@ -73,7 +123,7 @@ export function TryIt() {
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [acknowledged, setAcknowledged] = useState(false);
   const [signature, setSignature] = useState("");
-  const [verifyError, setVerifyError] = useState<string | null>(null);
+  const [verifyError, setVerifyError] = useState<FriendlyError | null>(null);
   const [showManualEntry, setShowManualEntry] = useState(false);
 
   const quote = stage.step === "quote" ? stage.quote : null;
@@ -172,10 +222,14 @@ export function TryIt() {
       if (res.status === 200) {
         setStage({ step: "result", result: body as SkillCheckResult });
       } else {
-        setVerifyError(body?.error ?? `Verification failed (${res.status}).`);
+        setVerifyError({
+          text: body?.error ?? `Verification failed (${res.status}).`,
+        });
       }
     } catch {
-      setVerifyError("Couldn't reach Attesto to verify payment. Try again.");
+      setVerifyError({
+        text: "Couldn't reach Attesto to verify payment. Try again.",
+      });
     } finally {
       setVerifyLoading(false);
     }
@@ -197,9 +251,7 @@ export function TryIt() {
       setSignature(sig);
       await verifyPayment(sig);
     } catch (err) {
-      setVerifyError(
-        err instanceof Error ? err.message : "Payment failed or was rejected.",
-      );
+      setVerifyError(describeWalletError(err));
     }
   };
 
@@ -335,8 +387,42 @@ export function TryIt() {
             </label>
 
             {verifyError && (
-              <p className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
-                {verifyError}
+              <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                <p>{verifyError.text}</p>
+                {verifyError.faucetHref && (
+                  <a
+                    href={verifyError.faucetHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-2 hover:text-destructive/80"
+                  >
+                    {verifyError.faucetLabel}
+                  </a>
+                )}
+              </div>
+            )}
+
+            {walletStatus === "connected" && (
+              <p className="text-xs text-foreground/50">
+                New wallet? Get free devnet funds first:{" "}
+                <a
+                  href="https://faucet.solana.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 hover:text-foreground"
+                >
+                  SOL faucet
+                </a>{" "}
+                for the fee,{" "}
+                <a
+                  href="https://faucet.circle.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-2 hover:text-foreground"
+                >
+                  USDC faucet
+                </a>{" "}
+                (pick Solana Devnet) to pay.
               </p>
             )}
 
