@@ -1,17 +1,66 @@
 # Attesto — pitch/demo video script (draft)
 
-Target: ~3 minutes, structured in segments so it splits cleanly into a
-separate presentation + demo video if the actual Colosseum submission form
-turns out to want that instead of one combined video. **Not verified against
-the real submission form** (the Official Rules PDF only says Content must be
-in English and lists judging criteria — no minutage; the "2-3 min pitch + up
-to 3 min demo" figure floating around search results wasn't confirmed
-against a primary source). Confirm the real format/length in the submission
-form itself before recording, and trim/split this accordingly.
+**Deadline, verified live 2026-10-07 against the official rules PDF**
+(`colosseum.com/legal/Crypto World's Fair Hackathon Rules.pdf`, Section 5):
+submissions close **11:59pm PT (Pacific Time) on October 12, 2026** —
+"Administrator's computer is the official time-keeping device." Plan says
+submit by 11-oct as buffer; that buffer is real, not just caution — PT
+means whatever's recorded needs to land before 11:59pm Pacific specifically,
+not midnight in any other zone.
+
+**Video length/format: still not specified anywhere public.** The official
+rules (Section 12) only require Content to be in English and not violate a
+third-party video platform's own terms — no minutage, no format, no
+upload-location requirement anywhere in the PDF, the public `/worldsfair`
+page, or its FAQ. This was checked directly against the primary source, not
+inferred. **The real spec is almost certainly only visible inside the
+logged-in submission dashboard/form** (team registration already exists,
+per `docs/CHECKLIST-panel-review.md`) — that needs a human to check, an
+agent session has no login for it. Target below stays **~3 minutes**,
+segmented so it splits into pitch+demo separately if the real form wants
+that — confirm in the dashboard before the final cut, trim/split
+accordingly.
 
 Every claim below is something already true in the shipped product or repo
 — nothing invented for the pitch. Cross-reference: README.md, DECISIONS.md,
 `app/components/attesto/try-it.tsx`.
+
+## Shot list (timed)
+
+| Time | Shot | Source |
+| --- | --- | --- |
+| 0:00–0:30 | Talking head / slide — the problem | Segment 1 |
+| 0:30–0:40 | Screen: attesto.xyz, paste address, click "Get price" | Segment 2, beat 1 |
+| 0:40–0:55 | Screen: 402 quote renders (amount, pay-to, expiry countdown) | Segment 2, beat 2 |
+| 0:55–1:05 | Screen: check jurisdiction box, click Connect Wallet | Segment 2, beats 3–4 |
+| 1:05–1:25 | Screen: click Pay, wallet signature prompt, confirm | Segment 2, beat 5 |
+| 1:25–1:50 | Screen: result renders — score/100 + volume/recency/diversity | Segment 2, beat 6 |
+| 1:50–2:00 | Screen: click through receipt + tx links to Solana explorer | Segment 2, beat 7 |
+| 2:00–2:30 | Talking head / architecture slide — what's novel (Prova + Vouch402 lineage) | Segment 3 |
+| 2:30–3:00 | Both founders on camera — team, bus-factor, call to action | Segment 4 |
+
+## Demo address — use this, not Attesto's own program
+
+**Use `GoNaEo5bAAFpBADnuqE8E3M3DqCMEcYVE8LzcVxjRNPS`** when pasting into
+"Solana address to check." Verified live 2026-10-07 directly against
+devnet RPC (`getProgramAccounts` on Prova's program
+`G11dBAzLQaADtHHM2AZNz3ThCDnkY5nhX3Ujddu1CMM1`, decoding the real
+`prova_agent` account layout) and cross-checked against the live quote
+endpoint (`curl https://attesto.xyz/v1/skill-check/<address>` returns a
+real 402 for it):
+- **167,117 attestations, not revoked** — caps the volume component at
+  50/50 (formula is `min(count, 20) / 20 * 50`, so this clears it many
+  times over).
+- **Attestations landing ~once a minute, still live right now** — the most
+  recent one at check time was under 2 minutes old, which caps recency at
+  30/30 (`<=30 days` rule).
+- Floor on the final score is therefore **80/100** from volume+recency
+  alone; diversity (0-20) adds on top. This is a real, continuously-active
+  agent in Prova's actual devnet registry, not Attesto's own program (which
+  would show 0/100 — empty, wrong demo).
+- **Do not use the Attesto program ID** (`EgLkDDxhS1Cd61VjJzMSURC1zko3xtbcAexQqyGBqvdk`)
+  for this — that's Attesto's own program account, has no Prova attestation
+  history, and would render the demo's main screen empty.
 
 ---
 
@@ -111,12 +160,24 @@ exactly the thing to make visible here, not just claim in a form field.
 
 ## Things to swap in before recording
 
-- [ ] Confirm actual video length/format from the real submission form
-- [ ] Confirm whether a combined video or separate pitch+demo is expected
-- [ ] Record demo against whatever backend is live at record time (Fly.io
-      once the payment-binding fix ships, or wherever it ends up) — not
-      the old paste-signature flow, that's being replaced
+- [ ] **Still open:** confirm actual video length/format from the logged-in
+      submission dashboard (not public anywhere — checked 2026-10-07)
+- [ ] **Still open:** confirm whether a combined video or separate
+      pitch+demo is expected — same dashboard check as above
+- [x] Demo address confirmed: `GoNaEo5bAAFpBADnuqE8E3M3DqCMEcYVE8LzcVxjRNPS`
+      (see above) — verified live against devnet and the production quote
+      endpoint 2026-10-07
+- [x] Deadline confirmed: 11:59pm PT, October 12, 2026 (official rules PDF,
+      verified live 2026-10-07)
+- [ ] Record demo against whatever backend is live at record time — the
+      payment-error-explanation fix shipped 2026-10-07, confirmed live;
+      no other pending backend changes known as of this draft
 - [ ] Fill in Monserrat's own words for her segment — the line above is a
       placeholder, not something to read verbatim without her sign-off
 - [ ] Get a real fulfillment receipt + transaction on an explorer queued
-      up before recording, don't rely on live devnet being fast on the day
+      up before recording — the chosen demo address is a live, continuously
+      -active account, so a fresh paid skill-check against it will itself
+      produce a fresh receipt/tx; no need to pre-stage one
+- [ ] **Do not run `anchor test` again before recording** — Anchor.toml
+      points `cluster` at devnet, so every run redeploys the live program
+      for real (confirmed 2026-10-07, signature `4h2X2V...tsq`)
