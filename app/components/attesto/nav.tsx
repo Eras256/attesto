@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ThemeToggle } from "../theme-toggle";
+import { MobileNav } from "./mobile-nav";
 import { GITHUB_URL } from "@/app/lib/site";
 
 const LINKS = [
@@ -12,7 +13,7 @@ const LINKS = [
 
 export function Nav() {
   return (
-    <header className="sticky top-0 z-20 border-b border-border-low bg-background/80 backdrop-blur">
+    <header className="sticky top-0 z-20 border-b border-border-low bg-background/80 backdrop-blur relative">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link
           href="/"
@@ -62,6 +63,7 @@ export function Nav() {
             </svg>
           </a>
           <ThemeToggle />
+          <MobileNav links={LINKS} />
         </div>
       </div>
     </header>
