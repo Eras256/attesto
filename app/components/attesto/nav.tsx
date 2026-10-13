@@ -9,6 +9,7 @@ const LINKS = [
   { href: "#live-activity", label: "Live activity" },
   { href: "#try-it", label: "Try it" },
   { href: "#api-reference", label: "API" },
+  { href: "/pitch", label: "Pitch" },
 ];
 
 export function Nav() {
